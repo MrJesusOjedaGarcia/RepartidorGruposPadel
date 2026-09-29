@@ -1,0 +1,66 @@
+# Manual de usuario
+
+## Empezar
+
+Abre la aplicación en el navegador. Añádela a la pantalla de inicio desde el menú del navegador si quieres usarla como aplicación. Una vez cargada, la PWA conserva los datos en ese navegador y puede abrirse sin conexión.
+
+### Instalar y usar en teléfono o tablet
+
+- **iPhone/iPad:** abre la aplicación en Safari, pulsa **Compartir** y elige **Añadir a pantalla de inicio**. Ábrela desde el nuevo icono para usarla en modo aplicación.
+- **Android:** abre la aplicación en Chrome y usa **Instalar aplicación** o **Añadir a pantalla de inicio** desde el menú del navegador.
+- Puedes usarla en vertical u horizontal. En teléfonos las vistas se apilan y la clasificación usa tarjetas; en tablets se aprovecha el ancho con columnas. El selector de jornadas puede desplazarse lateralmente.
+- Si aparece el teclado virtual en una hoja de lesión/alta, desplaza el contenido del diálogo para ver sus botones; el diálogo tiene su propio scroll.
+
+## 1. Configurar el grupo
+
+1. En **El grupo**, escribe el nombre de cada persona y pulsa `+` o Enter.
+2. Pulsa **Marcar cabeza** junto a cada cabeza de pista. En los partidos 2 × 2, dos cabezas nunca compartirán equipo. Para ese formato se pueden marcar como máximo dos.
+3. Selecciona **Dobles (2 × 2)** o **Individual (1 × 1)**.
+4. Ajusta el número de jornadas y pistas con los botones `−` / `+` o editando el número.
+5. Pulsa **Generar jornadas**.
+
+El reparto evita repetir parejas de compañeros y prioriza que los cruces no se repitan; en individual, ningún duelo se repite. Cada persona juega como máximo una vez por jornada. Si ya no quedan cruces válidos, esa pista queda libre; la jornada aparece en el selector con un aviso.
+
+## 2. Registrar los resultados
+
+Abre **Las jornadas** y elige una jornada. Cada tarjeta muestra la pista y los dos equipos. Pulsa **Marcar en juego** cuando empiece el partido. Al terminar, marca **Gana A**, **Empate** o **Gana B**. Puedes seleccionar otro resultado si necesitas corregirlo. Un resultado ya anotado no se elimina al volver a pulsar el mismo botón.
+
+La aplicación suma automáticamente los puntos de todos los integrantes de cada equipo: **3** por ganar, **2** por empatar y **1** por perder. Los resultados y la jornada seleccionada se conservan al cerrar la aplicación.
+
+## 3. Consultar y compartir la clasificación
+
+Abre **Clasificación** para ver partidos jugados, victorias, empates, derrotas y puntos. **Descargar imagen PNG** crea una imagen de la tabla en el dispositivo, lista para compartir.
+
+## Cambiar el grupo o empezar otra vez
+
+- Para volver a repartir, abre **El grupo** y pulsa **Recalcular pendientes**. Revisa la vista previa y confirma; los partidos terminados no se sustituyen.
+- Para borrar las jornadas y los resultados manteniendo el grupo, pulsa `↻` en la parte superior y confirma. También se reinicia el historial de disponibilidad para iniciar un torneo nuevo.
+- Antes de generar el torneo, `×` retira a una persona del grupo.
+- Durante el torneo, el formato y las cabezas de pista quedan fijados. Usa **Lesión / baja** o **Reincorporar** en la fila de cada persona para cambiar su disponibilidad sin borrar el historial.
+
+## Gestionar altas, lesiones y recálculo
+
+Las bajas y las altas recalculan los partidos pendientes desde la jornada elegida. La vista previa enseña cuántos partidos se conservan, se vuelven a repartir y se generan, además de la carga proyectada por participante. Cancelar deja intactos el calendario y el grupo.
+
+### Dar de baja por lesión
+
+1. En el grupo, pulsa **Lesión / baja** junto a la persona y selecciona la jornada efectiva.
+2. Si participa en un partido en juego dentro del tramo a recalcular, vuelve a **Las jornadas** y registra su resultado o márcalo como interrumpido. La aplicación no permitirá confirmar el recálculo mientras quede un partido en juego.
+3. Revisa la vista previa: los partidos completados y sus resultados se conservan; se muestran los partidos pendientes que cambiarán y las pistas que podrían quedar libres.
+4. Confirma el recálculo. La persona conserva sus puntos e historial, pero deja de aparecer en partidos desde la jornada elegida.
+
+### Incorporar a una persona
+
+1. Escribe el nombre de la persona en el campo de jugadores, selecciona **Disponible desde** y pulsa `+`.
+2. Revisa y confirma la vista previa del nuevo calendario pendiente.
+3. La persona nueva comienza con cero partidos y puntos; las jornadas ya jugadas y sus resultados no se modifican.
+
+### Reincorporar a alguien y criterio de reparto
+
+Para reincorporar a alguien, pulsa **Reincorporar**, selecciona la jornada de vuelta y confirma el recálculo. El nuevo reparto intenta equilibrar los partidos completados y previstos de las personas disponibles. Puede asignar a alguien jornadas consecutivas o sin descanso; cada participante sigue teniendo como máximo un partido por jornada. Los partidos completados no se vuelven a sortear.
+
+Si un partido se interrumpe por lesión, márcalo como **Interrumpido** desde la tarjeta del partido en juego. Se conserva en el historial, no concede puntos y sus participantes no vuelven a jugar esa jornada.
+
+## Privacidad y almacenamiento
+
+Los nombres, jornadas y resultados se guardan únicamente en el almacenamiento local del navegador. No se necesita crear una cuenta. Si borras los datos del navegador o cambias de dispositivo, la información guardada no se traslada automáticamente.

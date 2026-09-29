@@ -1,0 +1,781 @@
+/* Shared responsive foundations for iOS, Android and tablets. */
+:root {
+  --visual-viewport-height: 100vh;
+  scroll-padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+button,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-right: max(18px, calc(72px + env(safe-area-inset-right, 0px)));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(18px, calc(72px + env(safe-area-inset-left, 0px)));
+}
+
+.topbar {
+  height: calc(88px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.view-tabs {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+.view-tabs::-webkit-scrollbar,
+.round-selector::-webkit-scrollbar {
+  display: none;
+}
+
+.view-tabs button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.round-selector {
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+.round-selector button {
+  scroll-snap-align: start;
+}
+
+.team strong,
+.player-name,
+.standing-player strong,
+.modal-card,
+.preview-load-row span {
+  overflow-wrap: anywhere;
+}
+
+.modal-backdrop {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: max(12px, env(safe-area-inset-top, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+}
+
+.modal-card {
+  max-height: calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-block: 16px;
+}
+
+.modal-field select,
+.join-round-field select {
+  max-width: 65%;
+  min-height: 44px;
+  border-radius: 4px;
+}
+
+@media (max-width: 800px) {
+  .app-shell {
+    padding-right: max(22px, calc(30px + env(safe-area-inset-right, 0px)));
+    padding-left: max(22px, calc(30px + env(safe-area-inset-left, 0px)));
+  }
+
+  .topbar {
+    height: calc(76px + env(safe-area-inset-top, 0px));
+  }
+
+  .main-content {
+    width: 100%;
+  }
+
+  .hero {
+    gap: clamp(18px, 3vw, 28px);
+  }
+
+  .panel,
+  .match-card {
+    min-width: 0;
+  }
+
+  .player-row {
+    row-gap: 4px;
+  }
+
+  .standings-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 720px) and (max-width: 1024px) {
+  .match-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .setup-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, .94fr);
+  }
+
+  .panel {
+    padding-right: clamp(14px, 2vw, 22px);
+    padding-left: clamp(14px, 2vw, 22px);
+  }
+
+  .captain-toggle,
+  .availability-action {
+    white-space: normal;
+  }
+
+  .hero-art {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 719px) {
+  .app-shell {
+    padding-right: calc(16px + env(safe-area-inset-right, 0px));
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+  }
+
+  .setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .match-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .setup-view,
+  .matches-view,
+  .standings-view {
+    min-width: 0;
+  }
+
+  .players-panel,
+  .settings-panel,
+  .generator-card,
+  .match-card,
+  .no-matches {
+    width: 100%;
+  }
+
+  .view-tabs {
+    justify-content: flex-start;
+    gap: clamp(12px, 4vw, 24px);
+    min-height: 52px;
+  }
+
+  .view-tabs button {
+    min-height: 48px;
+    padding-right: 5px;
+    padding-left: 5px;
+    font-size: 9px;
+  }
+
+  .view-tabs button.selected::after {
+    bottom: 0;
+  }
+
+  .player-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .player-row {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    min-height: 72px;
+    gap: 2px 6px;
+    padding: 6px 0;
+  }
+
+  .player-index {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .player-name {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    align-self: center;
+  }
+
+  .availability-pill {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    margin-left: 0;
+  }
+
+  .captain-toggle {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .availability-action {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .remove-player {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .captain-toggle,
+  .availability-action,
+  .remove-player {
+    min-height: 44px;
+  }
+
+  .add-player {
+    height: 48px;
+  }
+
+  .add-player input {
+    min-width: 0;
+    min-height: 48px;
+    padding-right: 10px;
+    padding-left: 12px;
+    font-size: 16px;
+  }
+
+  .add-player button,
+  .icon-button {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .join-round-field {
+    min-height: 44px;
+  }
+
+  .join-round-field select,
+  .modal-field select {
+    width: min(65%, 220px);
+    min-width: 0;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .number-input {
+    height: 46px;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+
+  .number-input button {
+    min-height: 44px;
+    font-size: 21px;
+  }
+
+  .number-input input {
+    min-width: 0;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .result-actions {
+    gap: 6px;
+  }
+
+  .result-actions button {
+    min-width: 0;
+    min-height: 46px;
+    padding: 5px 2px;
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  .result-actions button span {
+    font-size: 14px;
+  }
+
+  .match-controls button {
+    min-height: 44px;
+    padding: 9px 3px;
+    font-size: 9px;
+  }
+
+  .match-status {
+    min-height: 25px;
+    padding-top: 5px;
+    font-size: 9px;
+  }
+
+  .matches-meta {
+    flex-wrap: wrap;
+    gap: 7px 12px;
+    line-height: 1.5;
+  }
+
+  .matches-bottom {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .matches-bottom button {
+    min-height: 44px;
+  }
+
+  .primary-small,
+  .text-link,
+  .generator-card > button,
+  .standings-toolbar button {
+    min-height: 44px;
+  }
+
+  .modal-close {
+    top: max(10px, env(safe-area-inset-top, 0px));
+    right: max(10px, env(safe-area-inset-right, 0px));
+    width: 44px;
+    height: 44px;
+  }
+
+  .modal-actions {
+    position: sticky;
+    bottom: 0;
+    gap: 8px;
+    padding: 12px 0 max(8px, env(safe-area-inset-bottom, 0px));
+    background: #fffefa;
+  }
+
+  .modal-actions > button {
+    min-height: 46px;
+  }
+
+  .standings-toolbar button {
+    white-space: normal;
+  }
+
+  .standings-table-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .standings-table,
+  .standings-table tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .standings-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  .standings-table tbody {
+    display: grid;
+    gap: 9px;
+  }
+
+  .standings-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    height: auto;
+    min-width: 0;
+    padding: 10px 8px 7px;
+    border: 1px solid #e3e1da;
+    border-radius: 5px;
+    background: #fffefa;
+  }
+
+  .standings-table tbody tr.podium {
+    background: #faf8ee;
+  }
+
+  .standings-table td {
+    display: flex;
+    min-width: 0;
+    min-height: 39px;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 2px;
+    text-align: center !important;
+  }
+
+  .standings-table td:first-child {
+    grid-column: 1;
+    grid-row: 1;
+    padding-left: 2px;
+  }
+
+  .standings-table td:nth-child(2) {
+    grid-column: 2 / 6;
+    grid-row: 1;
+    justify-content: flex-start;
+    padding-left: 6px;
+  }
+
+  .standings-table td:nth-child(n + 3) {
+    flex-direction: column;
+    gap: 2px;
+    border-top: 1px solid #efeee9;
+    font-size: 12px;
+  }
+
+  .standings-table td:nth-child(n + 3)::before {
+    color: #8b9188;
+    content: attr(data-label);
+    font: 8px var(--mono);
+  }
+
+  .standing-player {
+    flex-wrap: wrap;
+    gap: 4px 7px;
+  }
+
+  .standing-player strong {
+    font-size: 12px;
+  }
+
+  .standing-player span {
+    font-size: 7px;
+  }
+
+  .scoring-legend {
+    flex-wrap: wrap;
+    line-height: 1.7;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-shell {
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
+    padding-left: calc(12px + env(safe-area-inset-left, 0px));
+  }
+
+  .hero {
+    gap: 17px;
+    padding-top: 24px;
+    padding-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-size: clamp(37px, 11vw, 46px);
+    letter-spacing: -1.8px;
+  }
+
+  .hero-art {
+    height: 155px;
+  }
+
+  .court-stamp {
+    right: 11px;
+    bottom: 39px;
+    width: 49px;
+    height: 49px;
+    font-size: 6px;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(28px, 8.5vw, 34px);
+    letter-spacing: -1px;
+  }
+
+  .section-heading p {
+    font-size: 11px;
+  }
+
+  .panel {
+    padding: 16px 12px;
+  }
+
+  .player-row {
+    grid-template-columns: 19px minmax(0, 1fr) auto;
+    column-gap: 4px;
+  }
+
+  .player-index {
+    width: 17px;
+  }
+
+  .player-name {
+    min-width: 0;
+    font-size: 10px;
+  }
+
+  .availability-pill {
+    padding: 4px 5px;
+    font-size: 6px;
+  }
+
+  .captain-toggle,
+  .availability-action {
+    padding-right: 4px;
+    padding-left: 4px;
+    font-size: 7px;
+  }
+
+  .number-settings {
+    gap: 8px;
+  }
+
+  .points-note {
+    flex-wrap: wrap;
+    white-space: normal;
+    line-height: 1.5;
+  }
+
+  .view-tabs {
+    gap: 8px;
+  }
+
+  .view-tabs button {
+    font-size: 8px;
+  }
+
+  .tab-num {
+    margin-right: 4px;
+  }
+
+  .progress-stamp {
+    padding: 7px 8px;
+  }
+
+  .matches-heading {
+    gap: 8px;
+  }
+
+  .matches-heading h2 {
+    font-size: 29px;
+  }
+
+  .match-card {
+    padding: 13px 10px 10px;
+  }
+
+  .teams {
+    grid-template-columns: minmax(0, 1fr) 27px minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .team strong {
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .match-card-top {
+    gap: 5px;
+    font-size: 7px;
+  }
+
+  .result-actions {
+    gap: 4px;
+  }
+
+  .result-actions button {
+    font-size: 8px;
+  }
+
+  .standings-toolbar {
+    align-items: stretch;
+  }
+
+  .standings-toolbar > div {
+    font-size: 7px;
+  }
+
+  .standings-toolbar button {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    align-items: end;
+  }
+
+  .modal-card {
+    width: 100%;
+    max-height: calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 8px);
+    padding: 24px 15px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .preview-counts {
+    gap: 4px;
+  }
+
+  .preview-counts > div {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 64px;
+    padding: 6px;
+  }
+
+  .preview-counts span {
+    font-size: 6px;
+  }
+
+  .modal-actions .primary-small {
+    padding-right: 7px;
+    padding-left: 7px;
+    font-size: 7px;
+  }
+
+  .page-footer {
+    flex-wrap: wrap;
+    gap: 7px 14px;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 359px) {
+  .view-tabs {
+    gap: 2px;
+  }
+
+  .view-tabs button {
+    font-size: 7px;
+  }
+
+  .tab-num {
+    margin-right: 2px;
+    font-size: 6px;
+  }
+
+  .hero-details {
+    gap: 7px;
+  }
+
+  .hero-details i {
+    width: 10px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+  }
+
+  .matches-heading .progress-stamp {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .result-actions button {
+    font-size: 7px;
+  }
+
+  .preview-counts strong {
+    font-size: 17px;
+  }
+}
+
+@media (max-height: 520px) and (max-width: 800px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding-top: 15px;
+    padding-bottom: 14px;
+  }
+
+  .hero-art {
+    display: none;
+  }
+
+  .hero h1 {
+    margin-top: 8px;
+    margin-bottom: 6px;
+    font-size: 36px;
+  }
+
+  .hero-copy > p,
+  .hero-details {
+    display: none;
+  }
+
+  .workspace {
+    padding-top: 22px;
+  }
+
+  .modal-backdrop {
+    align-items: center;
+  }
+
+  .modal-card {
+    max-height: calc(var(--visual-viewport-height, 100dvh) - 16px);
+    border-radius: 6px;
+  }
+}
+
+@media (pointer: coarse) {
+  .view-tabs button,
+  .round-selector button,
+  .result-actions button,
+  .captain-toggle,
+  .availability-action,
+  .remove-player,
+  .number-input button,
+  .match-controls button {
+    min-height: 44px;
+  }
+
+  .icon-button,
+  .add-player button,
+  .segmented-control button,
+  .primary-small,
+  .text-link,
+  .generator-card > button,
+  .standings-toolbar button,
+  .modal-close {
+    min-height: 44px;
+  }
+
+  .icon-button,
+  .add-player button {
+    min-width: 44px;
+  }
+
+  .remove-player {
+    min-width: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}

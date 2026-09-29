@@ -1,0 +1,75 @@
+# Requisitos — Repartidor de grupos de pádel
+
+## Objetivo y alcance
+
+Desarrollar una PWA en Vue.js para organizar partidos y jornadas de pádel, registrar resultados, consultar/exportar la clasificación y gestionar cambios de participantes que ocurran durante el torneo. La aplicación funciona en el dispositivo del organizador y conserva allí los datos.
+
+El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `diseno/wireframes/`. La documentación técnica y el manual se mantienen en `docs/`.
+
+## Requisitos funcionales
+
+### Configuración y reparto inicial
+
+1. Permitir añadir y retirar participantes y señalar a las cabezas de pista. En partidos 2 × 2, dos cabezas de pista no pueden formar el mismo equipo.
+2. Permitir elegir partidos 2 × 2 o 1 × 1, cantidad de jornadas y número de pistas disponibles.
+3. Generar el máximo de partidos viable para la configuración, favoreciendo que los participantes jueguen con distintas personas y equilibrando sus apariciones. La generación respeta el formato, las pistas, la disponibilidad y la rotación de compañeros.
+4. Una persona no puede estar asignada a más de un partido en la misma jornada. No se exige descanso entre jornadas: puede jugar en jornadas consecutivas y en todas las que sean compatibles con el equilibrio y la disponibilidad.
+
+### Resultados y clasificación
+
+5. Registrar el resultado de cada partido: victoria del equipo A, empate o victoria del equipo B.
+6. Asignar 3 puntos por victoria, 2 por empate y 1 por derrota a cada participante del equipo correspondiente.
+7. Mostrar la clasificación con todos los participantes —incluidos los lesionados o dados de baja— y permitir exportarla como imagen.
+
+### Cambios durante el torneo
+
+8. Permitir marcar a un participante como lesionado/no disponible con efecto desde la jornada actual aún abierta o desde una jornada futura. La persona conserva su historial, resultados y puntos, pero no se incluye en los nuevos partidos desde la fecha efectiva de la baja.
+9. Permitir incorporar a una persona nueva durante el torneo, indicar desde qué jornada está disponible y asignarla a los partidos pendientes a partir de esa jornada. La persona empieza con cero partidos y puntos, sin alterar resultados anteriores.
+10. Permitir modificar la disponibilidad o reincorporar a una persona, aplicando el cambio solo a partir de la jornada elegida.
+11. Al cambiar el grupo disponible, recalcular automáticamente los partidos pendientes de la jornada abierta y de las jornadas futuras. Los resultados ya registrados son inmutables durante el recálculo y sus partidos se conservan.
+12. En una jornada parcialmente jugada, mantener los partidos completados y recalcular solo los partidos sin empezar; quienes ya hayan jugado en esa jornada no pueden volver a asignarse en ella.
+13. Antes de aplicar el recálculo, mostrar un resumen de los cambios (partidos conservados, retirados y nuevos) y solicitar confirmación. Si se cancela, se conserva el calendario actual.
+14. Repartir las participaciones pendientes de modo que se intente reducir la diferencia entre el total de partidos jugados y previstos por cada participante disponible. El equilibrio de partidos tiene prioridad frente a repartir descansos entre jornadas; se permite que una persona juegue en todas las jornadas consecutivas necesarias. No se permite duplicar asignaciones simultáneas ni jugar dos partidos en una misma jornada.
+15. Si una persona se lesiona durante un partido, permitir marcar ese partido como interrumpido antes del recálculo. El partido interrumpido se conserva en el historial como incidencia, no concede puntos y sus participantes no vuelven a jugar esa jornada. Los demás partidos completados no se modifican.
+16. Informar cuando una jornada o pista quede libre por falta de cruces compatibles, disponibilidad, jugadores suficientes o límites de pistas.
+
+## Reglas de integridad del torneo
+
+- Los resultados y la composición de los partidos completados no cambian al modificar participantes.
+- Una baja no borra a la persona de la clasificación ni de las jornadas pasadas.
+- Una incorporación no modifica jornadas anteriores y participa desde su fecha de alta.
+- Cada jugador solo aparece en una pista por jornada.
+- Las cabezas de pista nunca comparten equipo en dobles, también en los calendarios recalculados.
+- Los partidos interrumpidos quedan diferenciados de los pendientes y los completados; no suman puntos.
+- La clasificación considera resultados completados. Los participantes con cambios de estado permanecen en la tabla y mantienen sus puntos históricos.
+
+## Requisitos de adaptabilidad móvil y tablet
+
+1. La PWA debe ser completamente utilizable en teléfonos Android e iOS y en tablets, en orientación vertical y horizontal, además de escritorio.
+2. El diseño debe admitir desde 320 CSS px de ancho, respetar las zonas seguras de notch/Dynamic Island/barras del sistema y adaptarse a la altura dinámica del navegador y del teclado virtual.
+3. En pantallas estrechas, configurar el grupo y las pistas en una columna, mostrar una tarjeta de partido por fila, convertir la clasificación en tarjetas y presentar los diálogos como hojas inferiores. En tablets se usan columnas cuando el ancho permite leer y tocar los controles con comodidad.
+4. No debe haber scroll horizontal en la página completa ni texto/acciones cortados. Solo se permite desplazamiento horizontal local en selectores de jornadas o listas diseñadas expresamente para ello.
+5. Las acciones táctiles principales deben tener una superficie objetivo de al menos 44 × 44 CSS px. Los controles deben funcionar sin hover, con teclado virtual y con ampliación de texto; los inputs de texto en iOS usarán al menos 16 px para evitar el zoom automático de Safari.
+6. La instalación en Safari de iOS y Chrome/Android debe ofrecer una experiencia standalone con icono y contenido dentro de los insets seguros del dispositivo.
+
+### Criterios de aceptación responsive
+
+- Verificar retrato y paisaje con anchos de 320, 360, 390, 768, 1024 y 1280 CSS px; cubrir las vistas de grupo, jornadas, clasificación, alta/baja y vista previa.
+- En 320–430 px, ninguna acción queda fuera de pantalla; la tabla se lee como tarjetas sin desplazamiento lateral de página.
+- En tablet, configuración y resultados aprovechan el ancho en dos columnas cuando cabe; la tabla conserva sus encabezados y legibilidad.
+- En Safari iOS y Chrome Android, notch, barras superior/inferior y teclado no tapan el encabezado, los formularios ni las acciones de los diálogos.
+- Los botones de navegación, resultados, disponibilidad y confirmación cumplen el tamaño táctil mínimo y permanecen utilizables en ambos modos de orientación.
+
+## Criterios de aceptación para las nuevas funcionalidades
+
+1. Si se da de baja a una persona, los partidos completados y sus resultados/puntos se conservan y sus partidos pendientes se vuelven a repartir sin incluirla desde la jornada indicada.
+2. Si se incorpora a alguien, aparece en la clasificación con cero puntos y puede entrar en los partidos no jugados desde su primera jornada disponible.
+3. En una jornada a medio completar, un resultado ya anotado no cambia y sus jugadores no se reasignan en la misma jornada; sí se recalculan los partidos pendientes.
+4. Después de cada recálculo, el total de partidos completados más previstos se reparte lo más equitativamente posible entre los participantes disponibles, pudiendo asignarles jornadas consecutivas sin descanso.
+5. Ninguna persona queda asignada a dos partidos en la misma jornada, ni se juntan dos cabezas de pista en el mismo equipo de dobles.
+6. Cancelar la confirmación no altera el calendario vigente. Las jornadas y la clasificación informan de partidos interrumpidos o pistas libres.
+
+## Evolución del documento
+
+- Versión inicial: configuración del grupo, generación de jornadas, resultados, puntos y exportación.
+- Ampliación: altas, bajas por lesión, partidos interrumpidos y recálculo con equilibrio de participaciones durante el torneo.
