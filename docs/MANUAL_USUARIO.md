@@ -14,7 +14,7 @@ Abre la aplicación en el navegador. Añádela a la pantalla de inicio desde el 
 ## 1. Configurar el grupo
 
 1. En **El grupo**, escribe el nombre de cada persona y pulsa `+` o Enter.
-2. Pulsa **Marcar cabeza** junto a cada cabeza de pista. En los partidos 2 × 2, dos cabezas nunca compartirán equipo. Para ese formato se pueden marcar como máximo dos.
+2. Pulsa **Marcar cabeza** junto a todas las cabezas de pista que necesites; no hay límite. En cada partido 2 × 2, las cabezas seleccionadas para ese cruce se repartirán en equipos distintos.
 3. Selecciona **Dobles (2 × 2)** o **Individual (1 × 1)**.
 4. Ajusta el número de jornadas y pistas con los botones `−` / `+` o editando el número.
 5. Pulsa **Generar jornadas**.

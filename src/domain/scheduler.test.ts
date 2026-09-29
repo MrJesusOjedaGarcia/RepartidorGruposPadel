@@ -82,6 +82,20 @@ describe('schedule generation and recalculation', () => {
     expect(Math.max(...appearances.values()) - Math.min(...appearances.values())).toBeLessThanOrEqual(1)
   })
 
+  it('allows any number of heads globally while never placing two in the same doubles team', () => {
+    const players = makePlayers(8, 6)
+    const result = generateSchedule(players, 4, 3, 'doubles')
+
+    expect(result.rounds.some((round) => round.matches.length > 0)).toBe(true)
+    for (const round of result.rounds) {
+      assertNoRepeatedPlayersInRound(round)
+      for (const match of round.matches) {
+        expect(match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain)).toHaveLength(1)
+        expect(match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain)).toHaveLength(1)
+      }
+    }
+  })
+
   it('adds late players and excludes an injured player only from the effective round onward', () => {
     const initialPlayers = makePlayers(8)
     const originalRounds = generateSchedule(initialPlayers, 5, 2, 'doubles').rounds

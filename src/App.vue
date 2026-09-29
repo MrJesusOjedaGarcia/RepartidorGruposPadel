@@ -219,11 +219,6 @@ function generate() {
     notice.value = mode.value === 'doubles' ? 'Añade al menos 4 jugadores para los partidos 2 × 2.' : 'Añade al menos 2 jugadores para los partidos 1 × 1.'
     return
   }
-  const captainCount = players.value.filter((player) => player.isCaptain).length
-  if (mode.value === 'doubles' && captainCount > 2) {
-    notice.value = 'En partidos 2 × 2 puede haber como máximo 2 cabezas de pista.'
-    return
-  }
   if (rounds.value.length) {
     prepareRecalculation(players.value, firstEditableRound.value, 'Repartir partidos pendientes')
     return
@@ -296,11 +291,6 @@ function cancelRecalculation() {
 function confirmRecalculation() {
   const proposal = recalculationProposal.value
   if (!proposal || proposal.schedule.inProgressMatches.length) return
-  if (mode.value === 'doubles' && proposal.players.filter((player) => player.isCaptain).length > 2) {
-    notice.value = 'En partidos 2 × 2 puede haber como máximo 2 cabezas de pista.'
-    recalculationProposal.value = null
-    return
-  }
   players.value = proposal.players
   rounds.value = proposal.schedule.rounds
   roundCount.value = proposal.targetRoundCount
@@ -324,10 +314,6 @@ function proposalRows(proposal: RecalculationProposal) {
     }).length, 0)
     return { player, projected, available: isAvailableAtRound(player, proposal.effectiveRound) }
   }).sort((a, b) => a.projected - b.projected || a.player.name.localeCompare(b.player.name, 'es'))
-}
-
-function proposalHasCaptainLimit(proposal: RecalculationProposal) {
-  return mode.value === 'doubles' && proposal.players.filter((player) => player.isCaptain).length > 2
 }
 
 function availabilityLabel(player: Player) {
@@ -577,12 +563,11 @@ function resetTournament() {
         <h2 id="recalculation-title">{{ recalculationProposal.title }}</h2>
         <p>Los partidos finalizados mantienen equipos, resultados y puntos. Solo se redistribuyen los partidos pendientes desde la jornada indicada.</p>
         <div v-if="recalculationProposal.schedule.inProgressMatches.length" class="preview-blocker" role="alert"><strong>Hay partidos en juego.</strong><span>Registra el resultado o vuelve a jornadas y márcalos como interrumpidos antes de recalcular.</span><span v-for="match in recalculationProposal.schedule.inProgressMatches" :key="match.id">Pista {{ match.court }} · {{ playerNamesFor([...match.teamA, ...match.teamB]) }}</span></div>
-        <div v-else-if="proposalHasCaptainLimit(recalculationProposal)" class="preview-blocker" role="alert"><strong>Hay más de dos cabezas de pista.</strong><span>En dobles, marca como máximo dos antes de aplicar el reparto.</span></div>
         <div class="preview-counts"><div><strong>{{ recalculationProposal.schedule.preservedMatches }}</strong><span>PARTIDOS<br />CONSERVADOS</span></div><div><strong>{{ recalculationProposal.schedule.removedMatches }}</strong><span>PENDIENTES<br />A REPARTIR</span></div><div><strong>{{ recalculationProposal.schedule.generatedMatches }}</strong><span>NUEVOS<br />PARTIDOS</span></div></div>
         <p v-if="recalculationProposal.schedule.skippedCourts" class="preview-note">{{ recalculationProposal.schedule.skippedCourts }} pistas quedarán libres por disponibilidad, capacidad o rotación.</p>
         <div class="preview-load"><h3>Partidos jugados + previstos</h3><div v-for="row in proposalRows(recalculationProposal)" :key="row.player.id" class="preview-load-row"><span>{{ row.player.name }} <small v-if="!row.available">NO DISPONIBLE</small></span><strong>{{ row.projected }}</strong></div></div>
         <p class="preview-footnote">Se equilibra la carga de partidos; no se exige descanso entre jornadas. Cada persona jugará como máximo una vez por jornada.</p>
-        <div class="modal-actions"><button type="button" class="text-link" @click="cancelRecalculation">CANCELAR</button><button type="button" class="primary-small" :disabled="recalculationProposal.schedule.inProgressMatches.length > 0 || proposalHasCaptainLimit(recalculationProposal)" @click="confirmRecalculation">CONFIRMAR Y RECALCULAR <span>↗</span></button></div>
+        <div class="modal-actions"><button type="button" class="text-link" @click="cancelRecalculation">CANCELAR</button><button type="button" class="primary-small" :disabled="recalculationProposal.schedule.inProgressMatches.length > 0" @click="confirmRecalculation">CONFIRMAR Y RECALCULAR <span>↗</span></button></div>
       </section>
     </div>
   </div>

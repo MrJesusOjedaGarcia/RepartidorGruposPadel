@@ -76,8 +76,10 @@ function partitionFour(ids: string[], captains: Set<string>, partnerPairs: Set<s
     [[a, d], [b, c]]
   ]
   const valid = splits.filter(([teamA, teamB]) => {
-    return !(teamA.every((id) => captains.has(id)) && captains.size > 1) &&
-      !(teamB.every((id) => captains.has(id)) && captains.size > 1) &&
+    const headsA = teamA.filter((id) => captains.has(id)).length
+    const headsB = teamB.filter((id) => captains.has(id)).length
+    return headsA <= 1 &&
+      headsB <= 1 &&
       !partnerPairs.has(pairKey(teamA[0], teamA[1])) &&
       !partnerPairs.has(pairKey(teamB[0], teamB[1]))
   })

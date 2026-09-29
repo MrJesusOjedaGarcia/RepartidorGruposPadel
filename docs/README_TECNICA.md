@@ -34,7 +34,7 @@ diseno/wireframes/          # Wireframes de todas las vistas y flujo de incidenc
 ## Reglas del generador
 
 1. En dobles se necesitan 4 jugadores disponibles por partido; en individual, 2. En cada jornada nadie juega dos veces.
-2. El modo dobles divide a los cuatro jugadores en dos equipos. Si hay dos cabezas de pista, el generador solo acepta divisiones que las sitúan en equipos opuestos. Para dobles se admiten hasta dos cabezas de pista.
+2. El modo dobles divide a los cuatro jugadores en dos equipos. No hay límite global de cabezas de pista; para cada cuarteto, se aceptan únicamente divisiones con como máximo una cabeza por equipo. Si un cuarteto contiene tres o cuatro cabezas, no existe una división válida y se busca otro cruce.
 3. En dobles, una pareja de compañeros no se repite. Entre las combinaciones válidas se priorizan cruces con menos enfrentamientos repetidos; si el grupo y los compañeros disponibles lo requieren, un cruce como rivales puede repetirse. En individual, el mismo duelo nunca se repite.
 4. Se favorece a los jugadores con menos apariciones proyectadas (partidos completados y pendientes que se mantienen), reduciendo la diferencia de carga y permitiendo jornadas consecutivas sin descanso mínimo.
 5. Las pistas libres se mantienen visibles cuando no hay suficientes jugadores, disponibilidad o cruces compatibles.
