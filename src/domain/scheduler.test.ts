@@ -125,26 +125,31 @@ describe('schedule generation and recalculation', () => {
 
   it('fills both courts, balances appearances and mixes matches with and without leaders', () => {
     const players = makePlayers(12, 4)
-    for (const seed of [13, 404, 2026]) {
-      const result = withRandomSeed(seed, () => generateSchedule(players, 5, 2, 'doubles'))
-      const appearances = new Map(players.map((player) => [player.id, 0]))
-      let sawMixedRound = false
+    for (const roundCount of [4, 5]) {
+      for (const seed of [13, 404, 2026]) {
+        const result = withRandomSeed(seed, () => generateSchedule(players, roundCount, 2, 'doubles'))
+        const appearances = new Map(players.map((player) => [player.id, 0]))
+        let sawMixedRound = false
 
-      for (const round of result.rounds) {
-        expect(round.matches).toHaveLength(2)
-        assertNoRepeatedPlayersInRound(round)
-        const headedMatches = round.matches.filter((match) => [...match.teamA, ...match.teamB].some((id) => players.find((player) => player.id === id)?.isCaptain)).length
-        if (headedMatches > 0 && headedMatches < round.matches.length) sawMixedRound = true
-        for (const match of round.matches) {
-          const captainsA = match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
-          const captainsB = match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
-          expect(captainsA).toBe(captainsB)
-          for (const id of [...match.teamA, ...match.teamB]) appearances.set(id, (appearances.get(id) ?? 0) + 1)
+        for (const round of result.rounds) {
+          expect(round.matches).toHaveLength(2)
+          assertNoRepeatedPlayersInRound(round)
+          const headedMatches = round.matches.filter((match) => [...match.teamA, ...match.teamB].some((id) => players.find((player) => player.id === id)?.isCaptain)).length
+          if (headedMatches > 0 && headedMatches < round.matches.length) sawMixedRound = true
+          for (const match of round.matches) {
+            const captainsA = match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+            const captainsB = match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+            expect(captainsA).toBe(captainsB)
+            for (const id of [...match.teamA, ...match.teamB]) appearances.set(id, (appearances.get(id) ?? 0) + 1)
+          }
         }
-      }
 
-      expect(sawMixedRound).toBe(true)
-      expect(Math.max(...appearances.values()) - Math.min(...appearances.values())).toBeLessThanOrEqual(1)
+        expect(sawMixedRound).toBe(true)
+        expect(Math.max(...appearances.values()) - Math.min(...appearances.values())).toBeLessThanOrEqual(1)
+        const leaderAverage = players.filter((player) => player.isCaptain).reduce((total, player) => total + appearances.get(player.id)!, 0) / 4
+        const otherAverage = players.filter((player) => !player.isCaptain).reduce((total, player) => total + appearances.get(player.id)!, 0) / 8
+        expect(Math.abs(leaderAverage - otherAverage)).toBeLessThanOrEqual(0.5)
+      }
     }
   })
 

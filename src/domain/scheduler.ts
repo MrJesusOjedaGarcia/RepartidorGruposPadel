@@ -339,6 +339,7 @@ interface ScheduleAttempt {
   repeatedPartnerships: number
   repeatedEncounters: number
   appearanceSpread: number
+  leaderAppearanceGap: number
   tieBreaker: number
 }
 
@@ -459,6 +460,12 @@ function buildScheduleAttempt(
   ).some(Boolean))
   const activeAppearances = activePlayers.map((player) => appearances.get(player.id) ?? 0)
   const appearanceSpread = activeAppearances.length ? Math.max(...activeAppearances) - Math.min(...activeAppearances) : 0
+  const leaderAppearances = activePlayers.filter((player) => captains.has(player.id)).map((player) => appearances.get(player.id) ?? 0)
+  const otherAppearances = activePlayers.filter((player) => !captains.has(player.id)).map((player) => appearances.get(player.id) ?? 0)
+  const leaderAppearanceGap = leaderAppearances.length && otherAppearances.length
+    ? Math.abs(leaderAppearances.reduce((sum, count) => sum + count, 0) * otherAppearances.length -
+      otherAppearances.reduce((sum, count) => sum + count, 0) * leaderAppearances.length)
+    : 0
 
   return {
     rounds,
@@ -470,6 +477,7 @@ function buildScheduleAttempt(
     repeatedPartnerships,
     repeatedEncounters,
     appearanceSpread,
+    leaderAppearanceGap,
     tieBreaker: Math.random()
   }
 }
@@ -478,6 +486,7 @@ function isBetterAttempt(candidate: ScheduleAttempt, current: ScheduleAttempt | 
   if (!current) return true
   if (candidate.generatedMatches !== current.generatedMatches) return candidate.generatedMatches > current.generatedMatches
   if (candidate.appearanceSpread !== current.appearanceSpread) return candidate.appearanceSpread < current.appearanceSpread
+  if (candidate.leaderAppearanceGap !== current.leaderAppearanceGap) return candidate.leaderAppearanceGap < current.leaderAppearanceGap
   if (candidate.captainModeImbalance !== current.captainModeImbalance) return candidate.captainModeImbalance < current.captainModeImbalance
   if (candidate.consecutiveNonCaptainAppearances !== current.consecutiveNonCaptainAppearances) return candidate.consecutiveNonCaptainAppearances < current.consecutiveNonCaptainAppearances
   if (candidate.consecutiveCaptainAppearances !== current.consecutiveCaptainAppearances) return candidate.consecutiveCaptainAppearances < current.consecutiveCaptainAppearances

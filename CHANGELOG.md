@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## [1.3.5] - 2026-09-30
+
+### Cambiado
+
+- El planificador equilibra la media de partidos entre jugadores líderes y el resto, además de procurar que cada participante tenga un total similar.
+- Se permite jugar jornadas consecutivas cuando eso evita que alguien quede por debajo en número de partidos.
+
 ## [1.3.4] - 2026-09-30
 
 ### Cambiado

@@ -50,7 +50,7 @@ El reparto compara calendarios por cantidad de partidos llenos y diferencia de a
 
 ## Versionado y publicaciones
 
-`package.json` es la fuente de la versión SemVer, que la interfaz muestra en la barra superior; `package-lock.json` mantiene el mismo número. Cada publicación se documenta en `CHANGELOG.md` y se marca en Git con una etiqueta `v<versión>` (por ejemplo, `v1.3.4`). Para el siguiente cambio de versión, actualizar el paquete con `npm version patch`, `npm version minor` o `npm version major`, completar el changelog y publicar tanto el commit como la etiqueta.
+`package.json` es la fuente de la versión SemVer, que la interfaz muestra en la barra superior; `package-lock.json` mantiene el mismo número. Cada publicación se documenta en `CHANGELOG.md` y se marca en Git con una etiqueta `v<versión>` (por ejemplo, `v1.3.5`). Para el siguiente cambio de versión, actualizar el paquete con `npm version patch`, `npm version minor` o `npm version major`, completar el changelog y publicar tanto el commit como la etiqueta.
 
 ## Puntuación y persistencia
 
