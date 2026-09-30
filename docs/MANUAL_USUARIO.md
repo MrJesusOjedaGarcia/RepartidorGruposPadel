@@ -19,7 +19,9 @@ Abre la aplicación en el navegador. Añádela a la pantalla de inicio desde el 
 4. Ajusta el número de jornadas y pistas con los botones `−` / `+` o editando el número.
 5. Pulsa **Generar jornadas**.
 
-El reparto evita repetir parejas de compañeros y prioriza que los cruces no se repitan; en individual, ningún duelo se repite. Cada persona juega como máximo una vez por jornada. Si ya no quedan cruces válidos, esa pista queda libre; la jornada aparece en el selector con un aviso.
+En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Cada persona juega como máximo una vez por jornada. Si tampoco queda un cruce válido con repeticiones, la pista queda libre.
+
+La versión de la aplicación aparece en la barra superior.
 
 ## 2. Registrar los resultados
 

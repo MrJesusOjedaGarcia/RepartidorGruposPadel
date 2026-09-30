@@ -12,7 +12,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 
 1. Permitir añadir y retirar participantes y señalar cualquier cantidad de cabezas de pista. En partidos 2 × 2, las cabezas que participen en un partido deben quedar en equipos distintos; si no existe una separación válida, ese cruce no se genera.
 2. Permitir elegir partidos 2 × 2 o 1 × 1, cantidad de jornadas y número de pistas disponibles.
-3. Generar el máximo de partidos viable para la configuración, favoreciendo que los participantes jueguen con distintas personas y equilibrando sus apariciones. La generación respeta el formato, las pistas, la disponibilidad y la rotación de compañeros.
+3. Generar el máximo de partidos viable para la configuración, priorizando compañeros nuevos y cruces con personas que aún no se han enfrentado, sin perder el equilibrio de apariciones. No repetir una pareja de compañeros mientras exista un partido compatible con parejas inéditas; cuando se agoten, elegir la alternativa con menos repeticiones.
 4. Una persona no puede estar asignada a más de un partido en la misma jornada. No se exige descanso entre jornadas: puede jugar en jornadas consecutivas y en todas las que sean compatibles con el equilibrio y la disponibilidad.
 
 ### Resultados y clasificación
@@ -41,6 +41,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - Cada jugador solo aparece en una pista por jornada.
 - Las cabezas de pista nunca comparten equipo en dobles, también en los calendarios recalculados.
 - No hay límite global de cabezas de pista; en cada partido 2 × 2, como máximo una cabeza juega en cada equipo.
+- Las parejas de compañeros se mantienen inéditas mientras exista una combinación compatible; solo se repiten cuando ya no puede formarse otro partido con parejas nuevas, y entonces se minimiza el número de repeticiones.
 - Los partidos interrumpidos quedan diferenciados de los pendientes y los completados; no suman puntos.
 - La clasificación considera resultados completados. Los participantes con cambios de estado permanecen en la tabla y mantienen sus puntos históricos.
 
@@ -70,8 +71,16 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 5. Ninguna persona queda asignada a dos partidos en la misma jornada, ni se juntan dos cabezas de pista en el mismo equipo de dobles.
 6. Cancelar la confirmación no altera el calendario vigente. Las jornadas y la clasificación informan de partidos interrumpidos o pistas libres.
 7. Se pueden marcar tres o más cabezas de pista en el grupo. Cada partido 2 × 2 generado tiene como máximo una cabeza en cada equipo; si no hay un cuarteto/separación válida, la pista queda libre en vez de crear un equipo con dos cabezas.
+8. Con 5 participantes disponibles, una pista y 5 jornadas, el reparto puede usar las 10 parejas posibles una sola vez. Cuando ya no queden parejas inéditas compatibles, se prioriza llenar las pistas con el mínimo de repeticiones.
+9. La versión SemVer mostrada en la aplicación coincide con `package.json` y el lockfile; cada versión publicada queda anotada en `CHANGELOG.md` y etiquetada en Git.
+
+## Versionado de la aplicación
+
+- Usar versionado semántico (SemVer) en `package.json`, sincronizado con el lockfile y visible en la interfaz.
+- Registrar cambios en `CHANGELOG.md` y etiquetar las publicaciones con `v<versión>` en Git.
 
 ## Evolución del documento
 
 - Versión inicial: configuración del grupo, generación de jornadas, resultados, puntos y exportación.
 - Ampliación: altas, bajas por lesión, partidos interrumpidos y recálculo con equilibrio de participaciones durante el torneo.
+- Reparto: optimización de parejas inéditas y cobertura de cruces; versionado SemVer visible en la PWA con changelog y etiquetas Git.

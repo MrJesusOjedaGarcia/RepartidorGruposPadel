@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   generateSchedule,
   isAvailableAtRound,
@@ -26,6 +26,20 @@ function assertNoRepeatedPlayersInRound(round: Round) {
       expect(playing.has(id)).toBe(false)
       playing.add(id)
     }
+  }
+}
+
+function withRandomSeed<T>(seed: number, run: () => T): T {
+  const random = vi.spyOn(Math, 'random')
+  let state = seed >>> 0
+  random.mockImplementation(() => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0
+    return state / 0x1_0000_0000
+  })
+  try {
+    return run()
+  } finally {
+    random.mockRestore()
   }
 }
 
@@ -57,6 +71,30 @@ describe('availability timeline', () => {
 })
 
 describe('schedule generation and recalculation', () => {
+  it('covers every possible doubles partnership when five players have enough rounds for full coverage', () => {
+    const players = makePlayers(5)
+    for (const seed of [1, 7, 42, 2026, 65537]) {
+      const result = withRandomSeed(seed, () => generateSchedule(players, 5, 1, 'doubles'))
+      const partnerships = new Set(result.rounds.flatMap((round) => round.matches.flatMap(partnershipKeys)))
+
+      expect(result.generatedMatches).toBe(5)
+      expect(partnerships.size).toBe(10)
+      for (const player of players) {
+        const partners = new Set([...partnerships].filter((pair) => pair.split('::').includes(player.id)))
+        expect(partners.size).toBe(players.length - 1)
+      }
+    }
+  })
+
+  it('repeats a partnership only after every compatible partnership has been used', () => {
+    const result = generateSchedule(makePlayers(4), 4, 1, 'doubles')
+    const partnerships = result.rounds.flatMap((round) => round.matches.flatMap(partnershipKeys))
+
+    expect(result.generatedMatches).toBe(4)
+    expect(new Set(partnerships).size).toBe(6)
+    expect(partnerships).toHaveLength(8)
+  })
+
   it('balances consecutive doubles rounds without duplicate partners or same-round assignments', () => {
     const players = makePlayers(8, 2)
     const result = generateSchedule(players, 5, 2, 'doubles')
