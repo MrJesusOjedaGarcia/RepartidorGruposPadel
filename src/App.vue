@@ -6,6 +6,7 @@ import {
   recalculateSchedule,
   reopenMatch as reopenMatchState,
   withAvailabilityChange,
+  type CaptainPolicy,
   type AvailabilityChange,
   type Match,
   type MatchMode,
@@ -23,6 +24,7 @@ interface StoredApp {
   roundCount: number
   courtCount: number
   mode: MatchMode
+  captainPolicy?: CaptainPolicy
 }
 
 interface RecalculationProposal {
@@ -47,6 +49,7 @@ const rounds = ref<Round[]>([])
 const roundCount = ref(5)
 const courtCount = ref(2)
 const mode = ref<MatchMode>('doubles')
+const captainPolicy = ref<CaptainPolicy>('optional')
 const newPlayerName = ref('')
 const joiningRound = ref(1)
 const activeView = ref<'setup' | 'matches' | 'standings'>('setup')
@@ -65,14 +68,14 @@ const tutorialSteps = [
     icon: '＋',
     eyebrow: 'PRIMERO, EL GRUPO',
     title: 'Prepara quién juega.',
-    description: 'Añade a las personas, elige dobles o individual y ajusta cuántas jornadas y pistas vais a usar.',
-    tip: 'Puedes señalar todas las cabezas de pista que necesites; en dobles siempre irán en equipos distintos.'
+    description: 'Añade a las personas, elige dobles o individual y ajusta las jornadas, pistas y regla de cabezas.',
+    tip: 'Puedes permitir partidos sin cabezas o pedir una cabeza en cada equipo. Nunca jugará una cabeza contra un equipo sin cabezas.'
   },
   {
     icon: '↗',
     eyebrow: 'DESPUÉS, A REPARTIR',
     title: 'Genera las jornadas.',
-    description: 'Pulsa «Generar jornadas» y la aplicación organizará los partidos y las pistas disponibles.',
+    description: 'Pulsa «Generar jornadas» y la aplicación intentará ocupar todas las pistas compatibles y alternar los descansos.',
     tip: 'Busca compañeros nuevos y cruces variados; solo repite pareja cuando no queda una combinación compatible.'
   },
   {
@@ -108,11 +111,19 @@ const roundChoices = computed(() => Array.from(
   { length: Math.max(1, maxEditableRound.value - firstEditableRound.value + 1) },
   (_, index) => firstEditableRound.value + index
 ))
-const canGenerate = computed(() => {
+const canGenerateWithPlayers = computed(() => {
   const minimum = mode.value === 'doubles' ? 4 : 2
   const horizon = Math.max(1, Math.min(60, roundCount.value))
   return Array.from({ length: horizon }, (_, index) => index + 1)
     .some((round) => players.value.filter((player) => isAvailableAtRound(player, round)).length >= minimum)
+})
+const canGenerate = computed(() => {
+  const minimum = mode.value === 'doubles' ? 4 : 2
+  const horizon = Math.max(1, Math.min(60, roundCount.value))
+  return Array.from({ length: horizon }, (_, index) => index + 1).some((round) => {
+    const available = players.value.filter((player) => isAvailableAtRound(player, round))
+    return available.length >= minimum && (captainPolicy.value === 'optional' || available.filter((player) => player.isCaptain).length >= 2)
+  })
 })
 const standings = computed(() => calculateStandings(players.value, rounds.value))
 
@@ -170,6 +181,7 @@ onMounted(() => {
     if (typeof data.roundCount === 'number' && Number.isFinite(data.roundCount)) roundCount.value = data.roundCount
     if (typeof data.courtCount === 'number' && Number.isFinite(data.courtCount)) courtCount.value = data.courtCount
     if (data.mode === 'singles' || data.mode === 'doubles') mode.value = data.mode
+    if (data.captainPolicy === 'optional' || data.captainPolicy === 'required') captainPolicy.value = data.captainPolicy
     const currentRound = findFirstEditableRoundIndex(rounds.value)
     activeRoundIndex.value = currentRound >= rounds.value.length ? Math.max(0, rounds.value.length - 1) : currentRound
     if (rounds.value.length) activeView.value = 'matches'
@@ -181,7 +193,8 @@ onMounted(() => {
           rounds: rounds.value,
           roundCount: roundCount.value,
           courtCount: courtCount.value,
-          mode: mode.value
+          mode: mode.value,
+          captainPolicy: captainPolicy.value
         } satisfies StoredApp))
         localStorage.removeItem(LEGACY_STORAGE_KEY)
       } catch {
@@ -203,7 +216,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => removeViewportListeners())
 
-watch([players, rounds, roundCount, courtCount, mode], () => {
+watch([players, rounds, roundCount, courtCount, mode, captainPolicy], () => {
   if (!storageReady.value) return
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     schemaVersion: 2,
@@ -211,7 +224,8 @@ watch([players, rounds, roundCount, courtCount, mode], () => {
     rounds: rounds.value,
     roundCount: roundCount.value,
     courtCount: courtCount.value,
-    mode: mode.value
+    mode: mode.value,
+    captainPolicy: captainPolicy.value
   } satisfies StoredApp))
 }, { deep: true })
 
@@ -311,14 +325,18 @@ function generate() {
   courtCount.value = safeCourtCount
 
   if (!rounds.value.length && !canGenerate.value) {
-    notice.value = mode.value === 'doubles' ? 'Añade al menos 4 jugadores para los partidos 2 × 2.' : 'Añade al menos 2 jugadores para los partidos 1 × 1.'
+    if (captainPolicy.value === 'required' && canGenerateWithPlayers.value) {
+      notice.value = 'Has elegido cabezas en todos los partidos. Marca al menos dos cabezas de pista disponibles desde la misma jornada.'
+    } else {
+      notice.value = mode.value === 'doubles' ? 'Añade al menos 4 jugadores para los partidos 2 × 2.' : 'Añade al menos 2 jugadores para los partidos 1 × 1.'
+    }
     return
   }
   if (rounds.value.length) {
     prepareRecalculation(players.value, firstEditableRound.value, 'Repartir partidos pendientes')
     return
   }
-  rounds.value = generateSchedule(players.value, safeRoundCount, safeCourtCount, mode.value).rounds
+  rounds.value = generateSchedule(players.value, safeRoundCount, safeCourtCount, mode.value, captainPolicy.value).rounds
   activeRoundIndex.value = Math.min(firstEditableRoundIndex.value, Math.max(0, rounds.value.length - 1))
   activeView.value = 'matches'
   notice.value = ''
@@ -385,7 +403,7 @@ function prepareAvailabilityChange() {
 function prepareRecalculation(proposedPlayers: Player[], effectiveRound: number, title: string) {
   const safeRound = Math.max(1, Math.floor(effectiveRound))
   const targetRoundCount = Math.min(60, Math.max(roundCount.value, rounds.value.length, safeRound))
-  const schedule = recalculateSchedule(proposedPlayers, targetRoundCount, courtCount.value, mode.value, rounds.value, safeRound - 1)
+  const schedule = recalculateSchedule(proposedPlayers, targetRoundCount, courtCount.value, mode.value, rounds.value, safeRound - 1, captainPolicy.value)
   recalculationProposal.value = { title, players: proposedPlayers, schedule, effectiveRound: safeRound, targetRoundCount }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -605,6 +623,7 @@ function resetTournament() {
             <article class="panel settings-panel">
               <div class="panel-heading"><div class="panel-number">B</div><div><h3>El plan de juego</h3><p>Tú pones los límites.</p></div></div>
               <fieldset class="mode-field"><legend>FORMATO DEL PARTIDO</legend><div class="segmented-control"><button type="button" :disabled="rounds.length > 0" :class="{ chosen: mode === 'doubles' }" @click="mode = 'doubles'"><span>2 × 2</span><small>Dobles</small></button><button type="button" :disabled="rounds.length > 0" :class="{ chosen: mode === 'singles' }" @click="mode = 'singles'"><span>1 × 1</span><small>Individual</small></button></div></fieldset>
+              <label class="captain-policy-field" for="captain-policy"><span>REGLA DE CABEZAS</span><select id="captain-policy" v-model="captainPolicy" :disabled="rounds.length > 0"><option value="optional">Permitir partidos sin cabezas</option><option value="required">Cabezas en todos los partidos</option></select><small v-if="rounds.length">La regla queda fijada durante el torneo.</small><small v-else-if="captainPolicy === 'optional'">Si una cabeza juega, habrá otra en el equipo contrario.</small><small v-else>Cada partido requiere al menos dos cabezas: una en cada equipo.</small></label>
               <div class="number-settings"><label><span>JORNADAS</span><span class="number-input"><button type="button" aria-label="Menos jornadas" @click="roundCount = Math.max(rounds.length, 1, roundCount - 1)">−</button><input v-model.number="roundCount" type="number" min="1" max="60" /><button type="button" aria-label="Más jornadas" @click="roundCount = Math.min(60, roundCount + 1)">+</button></span></label><label><span>PISTAS</span><span class="number-input"><button type="button" aria-label="Menos pistas" @click="courtCount = Math.max(1, courtCount - 1)">−</button><input v-model.number="courtCount" type="number" min="1" max="12" /><button type="button" aria-label="Más pistas" @click="courtCount = Math.min(12, courtCount + 1)">+</button></span></label></div>
               <div class="points-note"><span>3</span><span>GANAR</span><span>·</span><span>2</span><span>EMPATAR</span><span>·</span><span>1</span><span>JUGAR Y PERDER</span></div>
             </article>
@@ -621,8 +640,8 @@ function resetTournament() {
         <p v-if="notice" class="notice" role="status">{{ notice }}</p>
         <template v-if="rounds[activeRoundIndex]">
           <div class="matches-meta"><span>JORNADA {{ (activeRoundIndex + 1).toString().padStart(2, '0') }} <i>—</i> {{ rounds[activeRoundIndex].matches.length }} {{ rounds[activeRoundIndex].matches.length === 1 ? 'PARTIDO' : 'PARTIDOS' }}</span><span v-if="rounds[activeRoundIndex].matches.length">Toca un resultado para guardarlo <b>↗</b></span></div>
-          <p v-if="rounds[activeRoundIndex].matches.length < courtCount" class="court-note">{{ courtCount - rounds[activeRoundIndex].matches.length }} {{ courtCount - rounds[activeRoundIndex].matches.length === 1 ? 'pista libre' : 'pistas libres' }} por disponibilidad o cruces no compatibles.</p>
-          <div v-if="!rounds[activeRoundIndex].matches.length" class="no-matches"><span>✳</span><h3>Esta jornada no tiene partidos.</h3><p>Con la disponibilidad y las cabezas actuales no se puede formar un cruce compatible. Puedes incorporar a alguien o recalcular los partidos pendientes.</p><button type="button" @click="activeView = 'setup'">GESTIONAR EL GRUPO ↗</button></div>
+          <p v-if="rounds[activeRoundIndex].matches.length < courtCount" class="court-note">{{ courtCount - rounds[activeRoundIndex].matches.length }} {{ courtCount - rounds[activeRoundIndex].matches.length === 1 ? 'pista libre' : 'pistas libres' }} por disponibilidad, regla de cabezas o falta de cruces compatibles.</p>
+          <div v-if="!rounds[activeRoundIndex].matches.length" class="no-matches"><span>✳</span><h3>Esta jornada no tiene partidos.</h3><p>Con la disponibilidad y la regla de cabezas elegida no se puede formar un cruce compatible. Puedes incorporar a alguien o revisar la configuración.</p><button type="button" @click="activeView = 'setup'">GESTIONAR EL GRUPO ↗</button></div>
           <div class="match-grid">
             <article v-for="match in rounds[activeRoundIndex].matches" :key="match.id" class="match-card" :class="{ settled: match.status === 'completed', interrupted: match.status === 'interrupted', inprogress: match.status === 'inProgress' }">
               <div class="match-card-top"><span>PISTA {{ match.court.toString().padStart(2, '0') }}</span><span>{{ mode === 'doubles' ? 'DOBLES · 2 × 2' : 'INDIVIDUAL · 1 × 1' }}</span></div>
@@ -696,7 +715,7 @@ function resetTournament() {
         <p>Los partidos finalizados mantienen equipos, resultados y puntos. Solo se redistribuyen los partidos pendientes desde la jornada indicada.</p>
         <div v-if="recalculationProposal.schedule.inProgressMatches.length" class="preview-blocker" role="alert"><strong>Hay partidos en juego.</strong><span>Registra el resultado o vuelve a jornadas y márcalos como interrumpidos antes de recalcular.</span><span v-for="match in recalculationProposal.schedule.inProgressMatches" :key="match.id">Pista {{ match.court }} · {{ playerNamesFor([...match.teamA, ...match.teamB]) }}</span></div>
         <div class="preview-counts"><div><strong>{{ recalculationProposal.schedule.preservedMatches }}</strong><span>PARTIDOS<br />CONSERVADOS</span></div><div><strong>{{ recalculationProposal.schedule.removedMatches }}</strong><span>PENDIENTES<br />A REPARTIR</span></div><div><strong>{{ recalculationProposal.schedule.generatedMatches }}</strong><span>NUEVOS<br />PARTIDOS</span></div></div>
-        <p v-if="recalculationProposal.schedule.skippedCourts" class="preview-note">{{ recalculationProposal.schedule.skippedCourts }} pistas quedarán libres por disponibilidad, capacidad o rotación.</p>
+        <p v-if="recalculationProposal.schedule.skippedCourts" class="preview-note">{{ recalculationProposal.schedule.skippedCourts }} pistas quedarán libres por disponibilidad, capacidad, regla de cabezas o falta de cruces compatibles.</p>
         <div class="preview-load"><h3>Partidos jugados + previstos</h3><div v-for="row in proposalRows(recalculationProposal)" :key="row.player.id" class="preview-load-row"><span>{{ row.player.name }} <small v-if="!row.available">NO DISPONIBLE</small></span><strong>{{ row.projected }}</strong></div></div>
         <p class="preview-footnote">Se equilibra la carga de partidos; no se exige descanso entre jornadas. Cada persona jugará como máximo una vez por jornada.</p>
         <div class="modal-actions"><button type="button" class="text-link" @click="cancelRecalculation">CANCELAR</button><button type="button" class="primary-small" :disabled="recalculationProposal.schedule.inProgressMatches.length > 0" @click="confirmRecalculation">CONFIRMAR Y RECALCULAR <span>↗</span></button></div>
@@ -743,4 +762,9 @@ function resetTournament() {
 @media(max-width:560px){.modal-card.tutorial-card{padding:24px 20px 18px}.tutorial-card h2{font-size:25px}.tutorial-card .tutorial-copy>p{font-size:11px}}
 @media(max-width:719px){.tutorial-card .tutorial-actions{position:sticky;bottom:0;padding:8px 0;background:#fffefa}}
 .match-controls .reopen-button{color:#667b67;text-decoration:underline;text-underline-offset:2px}
+.captain-policy-field{display:grid;gap:6px;margin:14px 0;color:#858b83;font:8px var(--mono);letter-spacing:.55px}
+.captain-policy-field select{width:100%;min-height:40px;padding:0 10px;border:1px solid #dfded6;background:#faf9f5;color:#173d35;font:10px 'DM Sans',sans-serif;letter-spacing:0}
+.captain-policy-field select:disabled{opacity:.62}
+.captain-policy-field small{color:#81877f;font:9px/1.5 'DM Sans',sans-serif;letter-spacing:0}
+@media(max-width:719px){.captain-policy-field select{min-height:44px;font-size:16px}}
 </style>

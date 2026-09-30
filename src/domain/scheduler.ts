@@ -1,4 +1,5 @@
 export type MatchMode = 'doubles' | 'singles'
+export type CaptainPolicy = 'optional' | 'required'
 export type MatchResult = 'teamA' | 'draw' | 'teamB' | null
 export type MatchStatus = 'scheduled' | 'inProgress' | 'completed' | 'interrupted'
 export type AvailabilityReason = 'joined' | 'injury' | 'return' | 'availability'
@@ -76,6 +77,7 @@ export function reopenMatch(match: Match): Match {
 interface PartnerEdge {
   players: [string, string]
   repeated: boolean
+  captainCount: 0 | 1
 }
 
 interface DoublesGame {
@@ -83,22 +85,27 @@ interface DoublesGame {
   teamB: string[]
   repeatedPartnerships: number
   repeatedEncounters: number
+  captainAppearances: number
+  consecutiveNonCaptains: number
+  consecutiveCaptains: number
 }
 
 function partnerEdges(
   available: string[],
   captains: Set<string>,
   partnerPairs: Set<string>,
-  allowRepeatedPartners: boolean
+  allowRepeatedPartners: boolean,
+  captainPolicy: CaptainPolicy
 ): PartnerEdge[] {
   const edges: PartnerEdge[] = []
   for (let first = 0; first < available.length; first += 1) {
     for (let second = first + 1; second < available.length; second += 1) {
       const players: [string, string] = [available[first], available[second]]
-      if (players.every((id) => captains.has(id))) continue
+      const captainCount = Number(captains.has(players[0])) + Number(captains.has(players[1]))
+      if (captainCount > 1 || (captainPolicy === 'required' && captainCount !== 1)) continue
       const repeated = partnerPairs.has(pairKey(players[0], players[1]))
       if (repeated && !allowRepeatedPartners) continue
-      edges.push({ players, repeated })
+      edges.push({ players, repeated, captainCount: captainCount as 0 | 1 })
     }
   }
   return shuffled(edges)
@@ -108,7 +115,7 @@ function disjointPartnerEdges(first: PartnerEdge, second: PartnerEdge): boolean 
   return !first.players.some((id) => second.players.includes(id))
 }
 
-function firstDoublesGame(edges: PartnerEdge[]): [PartnerEdge, PartnerEdge] | null {
+function firstDisjointPartnerGame(edges: PartnerEdge[]): [PartnerEdge, PartnerEdge] | null {
   const first = edges[0]
   if (!first) return null
   for (const edge of edges.slice(1)) {
@@ -126,8 +133,21 @@ function firstDoublesGame(edges: PartnerEdge[]): [PartnerEdge, PartnerEdge] | nu
   return null
 }
 
-function hasDoublesGame(available: string[], captains: Set<string>, partnerPairs: Set<string>): boolean {
-  return Boolean(firstDoublesGame(partnerEdges(available, captains, partnerPairs, true)))
+function firstDoublesGame(edges: PartnerEdge[]): [PartnerEdge, PartnerEdge] | null {
+  for (const captainCount of [1, 0] as const) {
+    const game = firstDisjointPartnerGame(edges.filter((edge) => edge.captainCount === captainCount))
+    if (game) return game
+  }
+  return null
+}
+
+function maxDoublesMatchCount(available: string[], captains: Set<string>, captainPolicy: CaptainPolicy): number {
+  const captainCount = available.filter((id) => captains.has(id)).length
+  const nonCaptainCount = available.length - captainCount
+  if (captainPolicy === 'required') return Math.floor(Math.min(captainCount, nonCaptainCount) / 2)
+  const captainMatches = Math.min(Math.floor(captainCount / 2), Math.floor(nonCaptainCount / 2))
+  const headlessMatches = Math.floor((nonCaptainCount - captainMatches * 2) / 4)
+  return captainMatches + headlessMatches
 }
 
 function findDoublesGame(
@@ -136,12 +156,14 @@ function findDoublesGame(
   metPairs: Set<string>,
   partnerPairs: Set<string>,
   appearances: Map<string, number>,
-  prioritizeNextCourt: boolean
+  remainingCourtsAfterCurrent: number,
+  previousRoundPlayers: Set<string>,
+  captainPolicy: CaptainPolicy
 ): DoublesGame | null {
   const searchLimit = available.length <= 18 ? Number.POSITIVE_INFINITY : 18000
   const search = (allowRepeatedPartners: boolean): DoublesGame | null => {
-    const best: { value?: DoublesGame & { blocksNextCourt: boolean; maxAppearances: number; totalAppearances: number; tieBreaker: number } } = {}
-    const edges = partnerEdges(available, captains, partnerPairs, allowRepeatedPartners)
+    const best: { value?: DoublesGame & { unfilledFutureCourts: number; maxAppearances: number; totalAppearances: number; tieBreaker: number } } = {}
+    const edges = partnerEdges(available, captains, partnerPairs, allowRepeatedPartners, captainPolicy)
     // Check the full edge set so the repeat fallback never masks a fresh compatible match.
     const firstGame = firstDoublesGame(edges)
     if (!firstGame) return null
@@ -150,28 +172,31 @@ function findDoublesGame(
       examined += 1
       const selection = [...edgeA.players, ...edgeB.players]
       const keys = selection.flatMap((id, index) => selection.slice(index + 1).map((other) => pairKey(id, other)))
-      const nextPartnerPairs = new Set(partnerPairs)
-      nextPartnerPairs.add(pairKey(edgeA.players[0], edgeA.players[1]))
-      nextPartnerPairs.add(pairKey(edgeB.players[0], edgeB.players[1]))
-      const leftover = prioritizeNextCourt ? available.filter((id) => !selection.includes(id)) : []
-      const blocksNextCourt = prioritizeNextCourt && !hasDoublesGame(leftover, captains, nextPartnerPairs)
+      const leftover = available.filter((id) => !selection.includes(id))
+      const unfilledFutureCourts = Math.max(0, remainingCourtsAfterCurrent - maxDoublesMatchCount(leftover, captains, captainPolicy))
       const repeatedEncounters = keys.filter((key) => metPairs.has(key)).length
       const projectedCounts = selection.map((id) => appearances.get(id) ?? 0)
+      const captainAppearances = edgeA.captainCount + edgeB.captainCount
+      const consecutiveNonCaptains = selection.filter((id) => previousRoundPlayers.has(id) && !captains.has(id)).length
+      const consecutiveCaptains = selection.filter((id) => previousRoundPlayers.has(id) && captains.has(id)).length
       const candidate = {
         teamA: edgeA.players,
         teamB: edgeB.players,
         repeatedPartnerships: Number(edgeA.repeated) + Number(edgeB.repeated),
         repeatedEncounters,
-        blocksNextCourt,
+        captainAppearances,
+        consecutiveNonCaptains,
+        consecutiveCaptains,
+        unfilledFutureCourts,
         maxAppearances: Math.max(...projectedCounts),
         totalAppearances: projectedCounts.reduce((total, count) => total + count, 0),
         tieBreaker: Math.random()
       }
       const current = best.value
-      const candidateRank = [Number(candidate.blocksNextCourt), candidate.repeatedPartnerships, candidate.repeatedEncounters, candidate.maxAppearances, candidate.totalAppearances]
+      const candidateRank = [candidate.unfilledFutureCourts, -candidate.captainAppearances, candidate.consecutiveNonCaptains, candidate.consecutiveCaptains, candidate.repeatedPartnerships, candidate.repeatedEncounters, candidate.maxAppearances, candidate.totalAppearances]
       let isBetter = !current
       if (current) {
-        const currentRank = [Number(current.blocksNextCourt), current.repeatedPartnerships, current.repeatedEncounters, current.maxAppearances, current.totalAppearances]
+        const currentRank = [current.unfilledFutureCourts, -current.captainAppearances, current.consecutiveNonCaptains, current.consecutiveCaptains, current.repeatedPartnerships, current.repeatedEncounters, current.maxAppearances, current.totalAppearances]
         const rankDifference = candidateRank.findIndex((value, index) => value !== currentRank[index])
         isBetter = rankDifference < 0
           ? candidate.tieBreaker < current.tieBreaker
@@ -183,6 +208,7 @@ function findDoublesGame(
     inspect(firstGame[0], firstGame[1])
     for (let first = 0; first < edges.length; first += 1) {
       for (let second = first + 1; second < edges.length; second += 1) {
+        if (edges[first].captainCount !== edges[second].captainCount) continue
         if (!disjointPartnerEdges(edges[first], edges[second])) continue
         if (edges[first] === firstGame[0] && edges[second] === firstGame[1]) continue
         inspect(edges[first], edges[second])
@@ -194,17 +220,71 @@ function findDoublesGame(
   return search(false) ?? search(true)
 }
 
+function hasSinglesGame(
+  available: string[],
+  metPairs: Set<string>,
+  captains: Set<string>,
+  captainPolicy: CaptainPolicy
+): boolean {
+  for (let firstIndex = 0; firstIndex < available.length; firstIndex += 1) {
+    for (let secondIndex = firstIndex + 1; secondIndex < available.length; secondIndex += 1) {
+      const first = available[firstIndex]
+      const second = available[secondIndex]
+      const firstCaptain = captains.has(first)
+      const secondCaptain = captains.has(second)
+      if (firstCaptain !== secondCaptain || (captainPolicy === 'required' && !firstCaptain)) continue
+      if (!metPairs.has(pairKey(first, second))) return true
+    }
+  }
+  return false
+}
+
 function findSinglesGame(
   available: string[],
   metPairs: Set<string>,
-  appearances: Map<string, number>
+  appearances: Map<string, number>,
+  captains: Set<string>,
+  captainPolicy: CaptainPolicy,
+  previousRoundPlayers: Set<string>,
+  remainingCourtsAfterCurrent: number
 ): { teamA: string[]; teamB: string[] } | null {
-  const eligible = available.filter((first, index) => available.slice(index + 1).some((second) => !metPairs.has(pairKey(first, second))))
-  if (eligible.length === 0) return null
-  const first = shuffled(eligible).sort((a, b) => (appearances.get(a) ?? 0) - (appearances.get(b) ?? 0))[0]
-  const opponents = shuffled(available.filter((id) => id !== first && !metPairs.has(pairKey(first, id))))
-  opponents.sort((a, b) => (appearances.get(a) ?? 0) - (appearances.get(b) ?? 0))
-  return opponents.length ? { teamA: [first], teamB: [opponents[0]] } : null
+  const candidates: { first: string; second: string; captains: number; consecutiveNonCaptains: number; consecutiveCaptains: number; appearances: number; maxAppearances: number }[] = []
+  for (let firstIndex = 0; firstIndex < available.length; firstIndex += 1) {
+    for (let secondIndex = firstIndex + 1; secondIndex < available.length; secondIndex += 1) {
+      const first = available[firstIndex]
+      const second = available[secondIndex]
+      const firstCaptain = captains.has(first)
+      const secondCaptain = captains.has(second)
+      if (firstCaptain !== secondCaptain || (captainPolicy === 'required' && !firstCaptain)) continue
+      if (metPairs.has(pairKey(first, second))) continue
+      candidates.push({
+        first,
+        second,
+        captains: Number(firstCaptain) + Number(secondCaptain),
+        consecutiveNonCaptains: Number(previousRoundPlayers.has(first) && !firstCaptain) + Number(previousRoundPlayers.has(second) && !secondCaptain),
+        consecutiveCaptains: Number(previousRoundPlayers.has(first) && firstCaptain) + Number(previousRoundPlayers.has(second) && secondCaptain),
+        appearances: (appearances.get(first) ?? 0) + (appearances.get(second) ?? 0),
+        maxAppearances: Math.max(appearances.get(first) ?? 0, appearances.get(second) ?? 0)
+      })
+    }
+  }
+  candidates.sort((a, b) => b.captains - a.captains ||
+    a.consecutiveNonCaptains - b.consecutiveNonCaptains ||
+    a.consecutiveCaptains - b.consecutiveCaptains ||
+    a.appearances - b.appearances ||
+    a.maxAppearances - b.maxAppearances)
+  let match = shuffled(candidates.slice(0, Math.max(1, Math.min(12, candidates.length))))[0]
+  if (remainingCourtsAfterCurrent > 0 && candidates.length) {
+    const searchCandidates = available.length <= 24 ? candidates : candidates.slice(0, 128)
+    const continuation = searchCandidates.find((candidate) => hasSinglesGame(
+      available.filter((id) => id !== candidate.first && id !== candidate.second),
+      metPairs,
+      captains,
+      captainPolicy
+    ))
+    if (continuation) match = continuation
+  }
+  return match ? { teamA: [match.first], teamB: [match.second] } : null
 }
 
 function getMatchStatus(match: Match): MatchStatus {
@@ -240,6 +320,9 @@ interface ScheduleAttempt {
   rounds: Round[]
   skippedCourts: number
   generatedMatches: number
+  captainAppearances: number
+  consecutiveNonCaptainAppearances: number
+  consecutiveCaptainAppearances: number
   repeatedPartnerships: number
   repeatedEncounters: number
   appearanceSpread: number
@@ -253,6 +336,7 @@ function buildScheduleAttempt(
   mode: MatchMode,
   existingRounds: Round[],
   fromRoundIndex: number,
+  captainPolicy: CaptainPolicy,
   captains: Set<string>,
   initialMetPairs: Set<string>,
   initialPartnerPairs: Set<string>,
@@ -268,10 +352,14 @@ function buildScheduleAttempt(
   const appearances = new Map(initialAppearances)
   let skippedCourts = 0
   let generatedMatches = 0
+  let captainAppearances = 0
+  let consecutiveNonCaptainAppearances = 0
+  let consecutiveCaptainAppearances = 0
   let repeatedPartnerships = 0
   let repeatedEncounters = 0
 
   for (let roundIndex = Math.max(0, fromRoundIndex); roundIndex < totalRounds; roundIndex += 1) {
+    const previousRoundPlayers = new Set((rounds[roundIndex - 1]?.matches ?? []).flatMap((match) => [...match.teamA, ...match.teamB]))
     const existingRound = existingRounds[roundIndex]
     const lockedMatches = (existingRound?.matches ?? []).filter((match) => fixedStatuses.has(getMatchStatus(match)))
     rounds[roundIndex].matches = [...lockedMatches]
@@ -296,12 +384,21 @@ function buildScheduleAttempt(
       let repeatedPartnershipsForGame = 0
       let repeatedEncountersForGame = 0
       if (mode === 'doubles') {
-        const doublesGame = findDoublesGame(available, captains, metPairs, partnerPairs, appearances, freeCourts.length - courtIndex > 1 && available.length <= 10)
+        const doublesGame = findDoublesGame(
+          available,
+          captains,
+          metPairs,
+          partnerPairs,
+          appearances,
+          freeCourts.length - courtIndex - 1,
+          previousRoundPlayers,
+          captainPolicy
+        )
         game = doublesGame
         repeatedPartnershipsForGame = doublesGame?.repeatedPartnerships ?? 0
         repeatedEncountersForGame = doublesGame?.repeatedEncounters ?? 0
       } else {
-        game = findSinglesGame(available, metPairs, appearances)
+        game = findSinglesGame(available, metPairs, appearances, captains, captainPolicy, previousRoundPlayers, freeCourts.length - courtIndex - 1)
       }
       if (!game) {
         skippedCourts += 1
@@ -322,6 +419,12 @@ function buildScheduleAttempt(
       generatedMatches += 1
       const playing = [...game.teamA, ...game.teamB]
       playing.forEach((id) => {
+        if (captains.has(id)) {
+          captainAppearances += 1
+          if (previousRoundPlayers.has(id)) consecutiveCaptainAppearances += 1
+        } else if (previousRoundPlayers.has(id)) {
+          consecutiveNonCaptainAppearances += 1
+        }
         appearances.set(id, (appearances.get(id) ?? 0) + 1)
         available.splice(available.indexOf(id), 1)
       })
@@ -341,6 +444,9 @@ function buildScheduleAttempt(
     rounds,
     skippedCourts,
     generatedMatches,
+    captainAppearances,
+    consecutiveNonCaptainAppearances,
+    consecutiveCaptainAppearances,
     repeatedPartnerships,
     repeatedEncounters,
     appearanceSpread,
@@ -350,10 +456,13 @@ function buildScheduleAttempt(
 
 function isBetterAttempt(candidate: ScheduleAttempt, current: ScheduleAttempt | null): boolean {
   if (!current) return true
+  if (candidate.generatedMatches !== current.generatedMatches) return candidate.generatedMatches > current.generatedMatches
+  if (candidate.captainAppearances !== current.captainAppearances) return candidate.captainAppearances > current.captainAppearances
+  if (candidate.consecutiveNonCaptainAppearances !== current.consecutiveNonCaptainAppearances) return candidate.consecutiveNonCaptainAppearances < current.consecutiveNonCaptainAppearances
+  if (candidate.consecutiveCaptainAppearances !== current.consecutiveCaptainAppearances) return candidate.consecutiveCaptainAppearances < current.consecutiveCaptainAppearances
   const candidateNewPartnerships = candidate.generatedMatches * 2 - candidate.repeatedPartnerships
   const currentNewPartnerships = current.generatedMatches * 2 - current.repeatedPartnerships
   if (candidateNewPartnerships !== currentNewPartnerships) return candidateNewPartnerships > currentNewPartnerships
-  if (candidate.generatedMatches !== current.generatedMatches) return candidate.generatedMatches > current.generatedMatches
   if (candidate.repeatedPartnerships !== current.repeatedPartnerships) return candidate.repeatedPartnerships < current.repeatedPartnerships
   if (candidate.repeatedEncounters !== current.repeatedEncounters) return candidate.repeatedEncounters < current.repeatedEncounters
   if (candidate.appearanceSpread !== current.appearanceSpread) return candidate.appearanceSpread < current.appearanceSpread
@@ -366,7 +475,8 @@ export function recalculateSchedule(
   courtCount: number,
   mode: MatchMode,
   existingRounds: Round[] = [],
-  fromRoundIndex = 0
+  fromRoundIndex = 0,
+  captainPolicy: CaptainPolicy = 'optional'
 ): ScheduleResult {
   const totalRounds = Math.max(0, Math.floor(roundCount))
   const safeCourtCount = Math.max(1, Math.floor(courtCount))
@@ -409,6 +519,7 @@ export function recalculateSchedule(
       mode,
       existingRounds,
       fromRoundIndex,
+      captainPolicy,
       captains,
       metPairs,
       partnerPairs,
@@ -440,7 +551,8 @@ export function generateSchedule(
   players: Player[],
   roundCount: number,
   courtCount: number,
-  mode: MatchMode
+  mode: MatchMode,
+  captainPolicy: CaptainPolicy = 'optional'
 ): ScheduleResult {
-  return recalculateSchedule(players, roundCount, courtCount, mode)
+  return recalculateSchedule(players, roundCount, courtCount, mode, [], 0, captainPolicy)
 }

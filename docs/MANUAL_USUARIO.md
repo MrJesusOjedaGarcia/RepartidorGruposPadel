@@ -18,12 +18,17 @@ La primera vez que abras la aplicación aparecerá una guía rápida de cuatro p
 ## 1. Configurar el grupo
 
 1. En **El grupo**, escribe el nombre de cada persona y pulsa `+` o Enter.
-2. Pulsa **Marcar cabeza** junto a todas las cabezas de pista que necesites; no hay límite. En cada partido 2 × 2, las cabezas seleccionadas para ese cruce se repartirán en equipos distintos.
+2. Pulsa **Marcar cabeza** junto a todas las cabezas de pista que necesites; no hay límite. Cuando juegue una cabeza, también habrá una en el equipo contrario.
 3. Selecciona **Dobles (2 × 2)** o **Individual (1 × 1)**.
-4. Ajusta el número de jornadas y pistas con los botones `−` / `+` o editando el número.
-5. Pulsa **Generar jornadas**.
+4. En **Regla de cabezas**, elige **Permitir partidos sin cabezas** o **Cabezas en todos los partidos**. La primera opción admite partidos sin cabezas, pero si juega una cabeza, el otro equipo también tendrá una. La segunda exige una cabeza en cada equipo; si no hay dos cabezas disponibles para la misma jornada, no se podrá generar ese partido.
+5. Ajusta el número de jornadas y pistas con los botones `−` / `+` o editando el número.
+6. Pulsa **Generar jornadas**.
 
-En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Cada persona juega como máximo una vez por jornada. Si tampoco queda un cruce válido con repeticiones, la pista queda libre.
+La regla de cabezas se guarda en el dispositivo y queda fijada al crear las jornadas. Para cambiarla después, reinicia las jornadas del torneo desde `↻`.
+
+El reparto prioriza llenar todas las pistas que admitan partidos compatibles y rota los descansos para evitar que una persona juegue dos jornadas seguidas si puede mantener la misma cantidad de partidos. Las cabezas pueden participar con más frecuencia si hace falta para equilibrar los equipos. Cada persona juega como máximo una vez por jornada.
+
+En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Si la disponibilidad, la regla elegida para las cabezas o los cruces posibles no permiten ocupar una pista, queda libre.
 
 La versión de la aplicación aparece en la barra superior.
 

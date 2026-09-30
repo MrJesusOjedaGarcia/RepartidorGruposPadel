@@ -123,6 +123,111 @@ describe('schedule generation and recalculation', () => {
     expect(new Set(playingIds).size).toBe(players.length)
   })
 
+  it('fills both doubles courts and rotates non-captain rests when the group permits it', () => {
+    const players = makePlayers(12, 4)
+    for (const seed of [13, 404, 2026]) {
+      const result = withRandomSeed(seed, () => generateSchedule(players, 5, 2, 'doubles'))
+
+      for (const round of result.rounds) {
+        expect(round.matches).toHaveLength(2)
+        assertNoRepeatedPlayersInRound(round)
+        const playing = new Set(round.matches.flatMap((match) => [...match.teamA, ...match.teamB]))
+        expect([...playing].filter((id) => players.find((player) => player.id === id)?.isCaptain)).toHaveLength(4)
+        for (const match of round.matches) {
+          const captainsA = match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+          const captainsB = match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+          expect(captainsA).toBe(captainsB)
+        }
+      }
+
+      for (let index = 1; index < result.rounds.length; index += 1) {
+        const previousNonCaptains = new Set(result.rounds[index - 1].matches.flatMap((match) => [...match.teamA, ...match.teamB])
+          .filter((id) => !players.find((player) => player.id === id)?.isCaptain))
+        const currentNonCaptains = result.rounds[index].matches.flatMap((match) => [...match.teamA, ...match.teamB])
+          .filter((id) => !players.find((player) => player.id === id)?.isCaptain)
+        expect(currentNonCaptains.some((id) => previousNonCaptains.has(id))).toBe(false)
+      }
+    }
+  })
+
+  it('fills every compatible doubles court even when a round mixes headed and headless matches', () => {
+    const players = makePlayers(12, 4)
+    const result = generateSchedule(players, 3, 3, 'doubles', 'optional')
+
+    for (const round of result.rounds) {
+      expect(round.matches).toHaveLength(3)
+      for (const match of round.matches) {
+        const captainsA = match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+        const captainsB = match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+        expect(captainsA).toBe(captainsB)
+      }
+    }
+  })
+
+  it('requires one captain in each team of every doubles match when the strict policy is selected', () => {
+    const players = makePlayers(12, 4)
+    const result = generateSchedule(players, 4, 3, 'doubles', 'required')
+
+    for (const round of result.rounds) {
+      expect(round.matches).toHaveLength(2)
+      for (const match of round.matches) {
+        expect(match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain)).toHaveLength(1)
+        expect(match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain)).toHaveLength(1)
+      }
+    }
+  })
+
+  it('allows headless doubles matches but never mixes a headed team with a headless team', () => {
+    const players = makePlayers(10, 3)
+    const result = generateSchedule(players, 3, 2, 'doubles')
+
+    for (const round of result.rounds) {
+      expect(round.matches).toHaveLength(2)
+      for (const match of round.matches) {
+        const captainsA = match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+        const captainsB = match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
+        expect(captainsA).toBe(captainsB)
+      }
+    }
+    expect(result.rounds.flatMap((round) => round.matches).some((match) =>
+      [...match.teamA, ...match.teamB].every((id) => !players.find((player) => player.id === id)?.isCaptain)
+    )).toBe(true)
+  })
+
+  it('requires head-to-head singles matches under the strict policy', () => {
+    const players = makePlayers(8, 4)
+    const result = generateSchedule(players, 5, 1, 'singles', 'required')
+
+    expect(result.rounds.every((round) => round.matches.length === 1)).toBe(true)
+    for (const match of result.rounds.flatMap((round) => round.matches)) {
+      expect(match.teamA.every((id) => players.find((player) => player.id === id)?.isCaptain)).toBe(true)
+      expect(match.teamB.every((id) => players.find((player) => player.id === id)?.isCaptain)).toBe(true)
+    }
+  })
+
+  it('chooses singles pairs that leave a valid duel for the second free court', () => {
+    const players = makePlayers(4)
+    const completedDuel = (id: string, first: string, second: string): Match => ({
+      id,
+      court: 1,
+      teamA: [first],
+      teamB: [second],
+      result: 'teamA',
+      status: 'completed'
+    })
+    const history: Round[] = [
+      { id: 'round-1', matches: [completedDuel('r1', 'p1', 'p4')] },
+      { id: 'round-2', matches: [completedDuel('r2', 'p2', 'p3')] },
+      { id: 'round-3', matches: [completedDuel('r3', 'p2', 'p4')] }
+    ]
+
+    const result = recalculateSchedule(players, 4, 2, 'singles', history, 3)
+
+    expect(result.rounds[3].matches).toHaveLength(2)
+    expect(result.rounds[3].matches.every((match) => match.status === 'scheduled')).toBe(true)
+    assertNoRepeatedPlayersInRound(result.rounds[3])
+  })
+
   it('covers every possible doubles partnership when five players have enough rounds for full coverage', () => {
     const players = makePlayers(5)
     for (const seed of [1, 7, 42, 2026, 65537]) {
