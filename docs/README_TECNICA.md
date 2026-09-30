@@ -7,11 +7,12 @@ PWA de una sola página para organizar partidos de pádel, generar jornadas, reg
 ## Tecnologías y estructura
 
 - **Vue 3 + Composition API:** estado y vistas reactivas en `src/App.vue`.
-- **TypeScript:** tipos de jugadores, partidos, jornadas, formato y política de cabezas en `src/domain/scheduler.ts`.
+- **TypeScript:** tipos de jugadores, partidos, jornadas, formato y política de jugadores líderes en `src/domain/scheduler.ts`.
 - **Vite:** servidor de desarrollo y compilación estática.
 - **vite-plugin-pwa / Workbox:** manifiesto y service worker para instalación y acceso sin conexión después de la primera carga.
 - **Responsive móvil/tablet:** CSS por anchos/orientación, `viewport-fit=cover`, insets `safe-area-inset-*` y soporte de altura dinámica para Safari iOS/Chrome Android.
 - **Tutorial guiado:** cuatro pasos accesibles en `src/App.vue`, mostrado en primera visita, navegable con teclado/tacto y reabrible desde la cabecera; la preferencia se recuerda con una clave independiente en `localStorage`.
+- **Indicador de líder:** las tarjetas renderizan cada nombre por separado, resaltan a los jugadores líderes y añaden una etiqueta accesible para lectores de pantalla.
 - **Web Storage:** persistencia automática en `localStorage`, esquema `repartidor-padel-v2`, con migración desde `v1`.
 - **Canvas 2D:** creación de la imagen PNG de clasificación en el propio dispositivo.
 
@@ -35,16 +36,16 @@ diseno/wireframes/          # Wireframes de todas las vistas y flujo de incidenc
 ## Reglas del generador
 
 1. En dobles se necesitan 4 jugadores disponibles por partido; en individual, 2. En cada jornada nadie juega dos veces.
-2. `CaptainPolicy` permite `optional` (partidos sin cabezas permitidos) o `required` (una cabeza por equipo en cada partido). En ambos modos se exige simetría: o ambos equipos tienen una cabeza o ninguno; una cabeza nunca se enfrenta a un equipo sin cabezas. La regla se aplica en dobles e individual, se almacena con la configuración y queda fija durante el torneo.
+2. `CaptainPolicy` permite `optional` (partidos sin jugadores líderes permitidos) o `required` (un jugador líder por equipo en cada partido). En ambos modos se exige simetría: o ambos equipos tienen un líder o ninguno; un líder nunca se enfrenta a un equipo sin líderes. La regla se aplica en dobles e individual, se almacena con la configuración y queda fija durante el torneo.
 3. En dobles se buscan primero partidos en los que ambos equipos tengan una pareja inédita. Si no queda ningún cruce compatible con parejas nuevas, se permite repetir el mínimo de parejas posible para mantener la pista ocupada. En cada fase se priorizan además participantes que aún no se han cruzado; el equilibrio de apariciones desempata después. En individual, el mismo duelo nunca se repite.
 4. Primero se maximiza el número de partidos que caben simultáneamente y se busca una asignación que permita usar las pistas siguientes de la jornada.
-5. Se favorece que las cabezas participen como protagonistas cuando la disponibilidad y la política lo permiten; después se minimizan jornadas consecutivas para no-cabezas y se alternan las apariciones consecutivas de cabezas si hay alternativas.
+5. Se favorece que los jugadores líderes participen como protagonistas cuando la disponibilidad y la política lo permiten; después se minimizan jornadas consecutivas para participantes que no son líderes y se alternan las apariciones consecutivas de líderes si hay alternativas.
 6. Después se priorizan parejas nuevas y cruces no repetidos; las parejas solo se repiten si ninguna alternativa compatible queda, y se minimizan los partidos repetidos.
-7. Se favorece a los jugadores con menos apariciones proyectadas para equilibrar la carga. Las pistas libres se mantienen visibles cuando el formato, las cabezas o la disponibilidad no permiten llenarlas.
+7. Se favorece a los jugadores con menos apariciones proyectadas para equilibrar la carga. Las pistas libres se mantienen visibles cuando el formato, los jugadores líderes o la disponibilidad no permiten llenarlas.
 8. En un recálculo se conservan los partidos completados e interrumpidos, y los partidos pendientes anteriores a la jornada efectiva. Los participantes de partidos ya jugados/interrumpidos quedan bloqueados en esa jornada.
 9. Si queda un partido en juego dentro del tramo a recalcular, el recálculo se bloquea hasta registrar el resultado o marcarlo como interrumpido.
 
-El reparto compara calendarios por cantidad de partidos llenos, participación de cabezas, descansos consecutivos evitables, novedad de compañeros/cruces y equilibrio de carga. Al evaluar un partido, una cabeza solo puede estar en un equipo con una cabeza en el otro lado. La selección comprueba que una asignación deje jugadores suficientes para la siguiente pista; la generación se optimiza con varios calendarios candidatos en grupos pequeños. La búsqueda de parejas y cruces es una heurística, no un solucionador matemático que garantice un calendario global óptimo.
+El reparto compara calendarios por cantidad de partidos llenos, participación de jugadores líderes, descansos consecutivos evitables, novedad de compañeros/cruces y equilibrio de carga. Al evaluar un partido, un jugador líder solo puede estar en un equipo con otro líder en el lado contrario. La selección comprueba que una asignación deje jugadores suficientes para las pistas restantes; la generación se optimiza con varios calendarios candidatos en grupos pequeños. La búsqueda de parejas y cruces es una heurística, no un solucionador matemático que garantice un calendario global óptimo.
 
 ## Versionado y publicaciones
 
@@ -108,7 +109,7 @@ Cada `Match` distingue `scheduled`, `inProgress`, `completed` e `interrupted`. S
 
 ### Criterio de equilibrio
 
-El reparto debe contar los partidos completados y los previstos de cada participante que esté disponible en el periodo recalculado, incluyendo el historial completado anterior a un alta. En cada elección se favorece a quien tenga menos partidos proyectados; el objetivo es reducir al mínimo la diferencia entre la mayor y la menor carga proyectada, respetando pistas, formato, cabezas de pista y disponibilidad. Entre repartos con una carga semejante, se favorece ocupar los partidos posibles y variar las parejas.
+El reparto debe contar los partidos completados y los previstos de cada participante que esté disponible en el periodo recalculado, incluyendo el historial completado anterior a un alta. En cada elección se favorece a quien tenga menos partidos proyectados; el objetivo es reducir al mínimo la diferencia entre la mayor y la menor carga proyectada, respetando pistas, formato, jugadores líderes y disponibilidad. Entre repartos con una carga semejante, se favorece ocupar los partidos posibles y variar las parejas.
 
 No se impone un descanso mínimo entre jornadas: jugar jornadas consecutivas o todas las jornadas disponibles es válido y puede ser necesario para igualar el número de partidos. Se mantiene la restricción de un partido por persona y jornada para evitar asignaciones simultáneas o duplicadas. Las bajas no se incluyen en el conjunto usado para equilibrar partidos futuros, pero siguen figurando en la clasificación con su historial.
 
@@ -117,5 +118,5 @@ No se impone un descanso mínimo entre jornadas: jugar jornadas consecutivas o t
 - Los datos nuevos se guardan en `repartidor-padel-v2`. Al iniciar, los torneos de `v1` se migran: los participantes existentes están disponibles en todas las jornadas y el estado se infiere (`resultado` → `completed`; sin resultado → `scheduled`). Se conservan nombres, jornadas, resultados y puntos.
 - La opción `captainPolicy` (`optional`/`required`) se conserva en la configuración local; las instalaciones anteriores que no la tengan usan `optional`.
 - Se guarda el motivo y la jornada efectiva del cambio de disponibilidad. Los datos siguen locales; no se requiere sincronización con un servidor.
-- Las pruebas de `src/domain/scheduler.test.ts` cubren disponibilidad efectiva, altas, bajas, equilibrio, ocupación de pistas, simetría y política de cabezas, descansos, parejas inéditas, resultados preservados, reapertura de partidos, interrupciones, unicidad de asignaciones y puntuación. Las vistas muestran una previsualización antes de confirmar; cancelar no aplica el recálculo ni la modificación de participantes.
+- Las pruebas de `src/domain/scheduler.test.ts` cubren disponibilidad efectiva, altas, bajas, equilibrio, ocupación de pistas, simetría y política de jugadores líderes, descansos, parejas inéditas, resultados preservados, reapertura de partidos, interrupciones, unicidad de asignaciones y puntuación. Las vistas muestran una previsualización antes de confirmar; cancelar no aplica el recálculo ni la modificación de participantes.
 - Si la disponibilidad no permite completar todas las pistas, dejar las pistas necesarias libres y explicar el motivo en la vista previa y en la jornada.

@@ -10,7 +10,7 @@ CONFIGURACIÓN             JORNADAS                     CLASIFICACIÓN
 │ presentación     │      │ progreso/resultado│         │ título + exportar│
 ├ grupo ─┬ ajustes ┤      ├ selector jornadas│         ├ resumen          │
 │ nombres│ formato  │      ├ pistas / equipos │         ├ tabla ordenada   │
-│ cabezas│ pistas   │      │ botones resultado│         │ leyenda de puntos│
+│ líderes│ pistas   │      │ resultados/marcas│         │ leyenda de puntos│
 └────────┴ repartir ┘      └──────────────────┘         └──────────────────┘
                  ↘ GESTIÓN DE DISPONIBILIDAD ↙
         lesión / alta → vista previa → recalcular pendientes

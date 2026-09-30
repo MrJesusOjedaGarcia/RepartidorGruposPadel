@@ -18,7 +18,7 @@ Mantener las cuatro tareas completas —configurar el grupo, llevar las jornadas
 │ │ nombre     [+] │  │ pista / equipos   │ │
 │ │ alta desde     │  │ nombres envueltos │ │
 │ │ jugador estado│  │ en juego / estado │ │
-│ │ baja / cabeza  │  │ [A] [empate] [B]  │ │
+│ │ baja / líder   │  │ [A] [empate] [B]  │ │
 │ └────────────────┘  └───────────────────┘ │
 │ ┌ ajustes ───────┐                        │
 │ │ dobles / sing. │  CLASIFICACIÓN         │

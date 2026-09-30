@@ -10,12 +10,12 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 
 ### Configuración y reparto inicial
 
-1. Permitir añadir y retirar participantes y señalar cualquier cantidad de cabezas de pista. Como máximo habrá una cabeza en cada equipo y la cantidad de cabezas será igual en ambos lados del partido.
+1. Permitir añadir y retirar participantes y señalar cualquier cantidad de jugadores líderes. Como máximo habrá un líder en cada equipo y la cantidad de líderes será igual en ambos lados del partido.
 2. Permitir elegir partidos 2 × 2 o 1 × 1, cantidad de jornadas y número de pistas disponibles.
 3. En cada jornada, ocupar todas las pistas para las que exista una combinación simultánea compatible, considerando juntas las pistas libres para no dejar una vacía por una elección voraz en otra. Priorizar parejas nuevas y cruces variados una vez asegurada la capacidad de juego.
-4. Rotar los descansos para evitar que una persona juegue en jornadas consecutivas cuando exista una planificación con la misma cantidad de partidos y compatible con las cabezas. Las cabezas pueden jugar más si la composición del grupo lo exige.
+4. Rotar los descansos para evitar que una persona juegue en jornadas consecutivas cuando exista una planificación con la misma cantidad de partidos y compatible con los jugadores líderes. Los líderes pueden jugar más si la composición del grupo lo exige.
 5. Una persona no puede estar asignada a más de un partido en la misma jornada.
-6. Permitir seleccionar antes de generar si pueden existir partidos sin cabezas o si cada partido debe tener cabezas en ambos equipos. La elección se conserva con la configuración del torneo.
+6. Permitir seleccionar antes de generar si pueden existir partidos sin jugadores líderes o si cada partido debe tener líderes en ambos equipos. La elección se conserva con la configuración del torneo.
 
 ### Resultados y clasificación
 
@@ -31,11 +31,12 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 13. Al cambiar el grupo disponible, recalcular automáticamente los partidos pendientes de la jornada abierta y de las jornadas futuras. Los resultados ya registrados son inmutables durante el recálculo y sus partidos se conservan.
 14. En una jornada parcialmente jugada, mantener los partidos completados y recalcular solo los partidos sin empezar; quienes ya hayan jugado en esa jornada no pueden volver a asignarse en ella.
 15. Antes de aplicar el recálculo, mostrar un resumen de los cambios (partidos conservados, retirados y nuevos) y solicitar confirmación. Si se cancela, se conserva el calendario actual.
-16. Repartir las participaciones pendientes de modo que se intente reducir la diferencia entre el total de partidos jugados y previstos por cada participante disponible, respetando primero la ocupación de pistas y rotando descansos cuando sea posible. Las cabezas pueden jugar jornadas consecutivas si su participación resulta necesaria. No se permite duplicar asignaciones simultáneas ni jugar dos partidos en una misma jornada.
+16. Repartir las participaciones pendientes de modo que se intente reducir la diferencia entre el total de partidos jugados y previstos por cada participante disponible, respetando primero la ocupación de pistas y rotando descansos cuando sea posible. Los jugadores líderes pueden jugar jornadas consecutivas si su participación resulta necesaria. No se permite duplicar asignaciones simultáneas ni jugar dos partidos en una misma jornada.
 17. Si una persona se lesiona durante un partido, permitir marcar ese partido como interrumpido antes del recálculo. El partido interrumpido se conserva en el historial como incidencia, no concede puntos y sus participantes no vuelven a jugar esa jornada. Los demás partidos completados no se modifican.
-18. Informar cuando una jornada o pista quede libre por falta de cruces compatibles, disponibilidad, jugadores suficientes, política de cabezas o límites de pistas.
+18. Informar cuando una jornada o pista quede libre por falta de cruces compatibles, disponibilidad, jugadores suficientes, política de jugadores líderes o límites de pistas.
 19. Ofrecer un tutorial inicial breve, dividido en pasos, que explique configuración, generación de jornadas, resultados/clasificación y cambios de disponibilidad. Debe mostrarse en la primera visita, poder recorrerse o cerrarse, recordar que ya se completó en el dispositivo y poder reabrirse en cualquier momento desde un botón de ayuda.
 20. Permitir reabrir un partido completado o interrumpido. La acción requiere confirmación, devuelve el partido a pendiente, limpia el resultado/puntos anteriores si los había y conserva jornada, pista y equipos para volver a jugarlo o registrar el estado correcto.
+21. Resaltar visualmente los nombres de jugadores líderes en las tarjetas de cada jornada y usar «jugador líder» en las etiquetas y ayudas visibles de la aplicación.
 
 ## Reglas de integridad del torneo
 
@@ -43,15 +44,15 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - Una baja no borra a la persona de la clasificación ni de las jornadas pasadas.
 - Una incorporación no modifica jornadas anteriores y participa desde su fecha de alta.
 - Cada jugador solo aparece en una pista por jornada.
-- No hay límite global de cabezas de pista; ninguna pareja de equipo puede contener más de una cabeza.
-- En todos los partidos, las dos partes tienen la misma cantidad de cabezas: o ninguna, o una en cada equipo. Nunca se enfrenta una cabeza a un equipo sin cabezas.
-- Si se activa «Cabezas en todos los partidos», cada cruce debe tener exactamente una cabeza en cada equipo; las pistas que no admitan ese formato quedan libres.
+- No hay límite global de jugadores líderes; ningún equipo puede contener más de uno.
+- En todos los partidos, ambos equipos tienen la misma cantidad de jugadores líderes: o ninguno o uno en cada equipo. Nunca se enfrenta a un líder contra un equipo sin líderes.
+- Si se activa «Jugadores líderes en todos los partidos», cada cruce debe tener exactamente un líder en cada equipo; las pistas que no admitan ese formato quedan libres.
 - Las parejas de compañeros se mantienen inéditas mientras exista una combinación compatible; solo se repiten cuando ya no puede formarse otro partido con parejas nuevas, y entonces se minimiza el número de repeticiones.
 - Los partidos interrumpidos quedan diferenciados de los pendientes y los completados; no suman puntos.
 - Un partido completado/interrumpido puede reabrirse expresamente; vuelve a pendiente y deja de bloquear a sus participantes en esa jornada hasta que se juegue o cierre de nuevo.
 - La clasificación considera resultados completados. Los participantes con cambios de estado permanecen en la tabla y mantienen sus puntos históricos.
 - El tutorial no modifica ni borra datos del torneo y la preferencia de haberlo completado se guarda localmente, sin cuenta ni servicio remoto.
-- Las jornadas priorizan llenar las pistas compatibles y rotar los descansos; jugar en jornadas consecutivas se reserva para los casos necesarios por capacidad y cabezas.
+- Las jornadas priorizan llenar las pistas compatibles y rotar los descansos; jugar en jornadas consecutivas se reserva para los casos necesarios por capacidad y jugadores líderes.
 
 ## Requisitos de adaptabilidad móvil y tablet
 
@@ -76,15 +77,16 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 2. Si se incorpora a alguien, aparece en la clasificación con cero puntos y puede entrar en los partidos no jugados desde su primera jornada disponible.
 3. En una jornada a medio completar, un resultado ya anotado no cambia y sus jugadores no se reasignan en la misma jornada; sí se recalculan los partidos pendientes.
 4. Después de cada recálculo, el total de partidos completados más previstos se reparte lo más equitativamente posible entre los participantes disponibles, pudiendo asignarles jornadas consecutivas sin descanso.
-5. Ninguna persona queda asignada a dos partidos en la misma jornada; ningún partido enfrenta una cabeza con un equipo rival sin cabezas.
+5. Ninguna persona queda asignada a dos partidos en la misma jornada; ningún partido enfrenta a un jugador líder con un equipo rival sin líderes.
 6. Cancelar la confirmación no altera el calendario vigente. Las jornadas y la clasificación informan de partidos interrumpidos o pistas libres.
-7. Se pueden marcar tres o más cabezas de pista en el grupo. En cada partido hay una cabeza en ambos equipos o ninguna; nunca se junta más de una cabeza en el mismo equipo.
+7. Se pueden marcar tres o más jugadores líderes en el grupo. En cada partido hay un líder en ambos equipos o ninguno; nunca se juntan dos líderes en un mismo equipo.
 8. Con 5 participantes disponibles, una pista y 5 jornadas, el reparto puede usar las 10 parejas posibles una sola vez. Cuando ya no queden parejas inéditas compatibles, se prioriza llenar las pistas con el mínimo de repeticiones.
 9. La versión SemVer mostrada en la aplicación coincide con `package.json` y el lockfile; cada versión publicada queda anotada en `CHANGELOG.md` y etiquetada en Git.
 10. En la primera visita aparece un tutorial corto con anterior/siguiente y omitir/cerrar; se puede reabrir desde Ayuda y funciona con teclado y pantalla táctil en móvil, tablet y escritorio.
 11. Reabrir un partido completado pide confirmación y, al aceptarla, retira sus puntos y deja el partido pendiente con los mismos equipos/pista; reabrir uno interrumpido también lo deja pendiente y permite iniciarlo otra vez.
-12. Con 12 participantes, 4 cabezas y 2 pistas, se ocupan ambas pistas en cada jornada si hay cruces válidos; cada partido mantiene igual número de cabezas en ambos equipos y ningún participante no-cabeza juega jornadas consecutivas si existe una rotación con la misma capacidad.
-13. El selector permite habilitar o exigir cabezas en cada partido. Con la opción estricta, solo se genera un partido cuando puede asignarse una cabeza a cada equipo.
+12. Con 12 participantes, 4 jugadores líderes y 2 pistas, se ocupan ambas pistas en cada jornada si hay cruces válidos; cada partido mantiene igual número de líderes en ambos equipos y ningún participante que no sea líder juega jornadas consecutivas si existe una rotación con la misma capacidad.
+13. El selector permite habilitar partidos sin líderes o exigir líderes en todos los partidos. Con la opción estricta, solo se genera un partido cuando puede asignarse un líder a cada equipo.
+14. Los nombres de los jugadores líderes aparecen resaltados en las tarjetas de las jornadas y se indica su rol con texto accesible; la interfaz utiliza el término «jugador líder».
 
 ## Versionado de la aplicación
 
@@ -98,4 +100,4 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - Reparto: optimización de parejas inéditas y cobertura de cruces; versionado SemVer visible en la PWA con changelog y etiquetas Git.
 - Ayuda: tutorial interactivo de bienvenida, accesible y recordado en el dispositivo.
 - Partidos: posibilidad de reabrir un resultado o interrupción y volver a jugar/corregir el partido.
-- Reparto: política configurable de cabezas, máxima ocupación viable de pistas y rotación preferente de descansos.
+- Reparto: política configurable de jugadores líderes, máxima ocupación viable de pistas y rotación preferente de descansos.

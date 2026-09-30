@@ -18,17 +18,19 @@ La primera vez que abras la aplicación aparecerá una guía rápida de cuatro p
 ## 1. Configurar el grupo
 
 1. En **El grupo**, escribe el nombre de cada persona y pulsa `+` o Enter.
-2. Pulsa **Marcar cabeza** junto a todas las cabezas de pista que necesites; no hay límite. Cuando juegue una cabeza, también habrá una en el equipo contrario.
+2. Pulsa **Marcar jugador líder** junto a todas las personas que necesites; no hay límite. Cuando juegue un líder, también habrá uno en el equipo contrario.
 3. Selecciona **Dobles (2 × 2)** o **Individual (1 × 1)**.
-4. En **Regla de cabezas**, elige **Permitir partidos sin cabezas** o **Cabezas en todos los partidos**. La primera opción admite partidos sin cabezas, pero si juega una cabeza, el otro equipo también tendrá una. La segunda exige una cabeza en cada equipo; si no hay dos cabezas disponibles para la misma jornada, no se podrá generar ese partido.
+4. En **Regla de jugadores líderes**, elige **Permitir partidos sin líderes** o **Líderes en todos los partidos**. La primera opción admite partidos sin líderes, pero si juega un líder, el otro equipo también tendrá uno. La segunda exige un líder en cada equipo; si no hay dos líderes disponibles para la misma jornada, no se podrá generar ese partido.
 5. Ajusta el número de jornadas y pistas con los botones `−` / `+` o editando el número.
 6. Pulsa **Generar jornadas**.
 
-La regla de cabezas se guarda en el dispositivo y queda fijada al crear las jornadas. Para cambiarla después, reinicia las jornadas del torneo desde `↻`.
+La regla de jugadores líderes se guarda en el dispositivo y queda fijada al crear las jornadas. Para cambiarla después, reinicia las jornadas del torneo desde `↻`.
 
-El reparto prioriza llenar todas las pistas que admitan partidos compatibles y rota los descansos para evitar que una persona juegue dos jornadas seguidas si puede mantener la misma cantidad de partidos. Las cabezas pueden participar con más frecuencia si hace falta para equilibrar los equipos. Cada persona juega como máximo una vez por jornada.
+El reparto prioriza llenar todas las pistas que admitan partidos compatibles y rota los descansos para evitar que una persona juegue dos jornadas seguidas si puede mantener la misma cantidad de partidos. Los jugadores líderes pueden participar con más frecuencia si hace falta para equilibrar los equipos. Cada persona juega como máximo una vez por jornada.
 
-En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Si la disponibilidad, la regla elegida para las cabezas o los cruces posibles no permiten ocupar una pista, queda libre.
+En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Si la disponibilidad, la regla elegida para los jugadores líderes o los cruces posibles no permiten ocupar una pista, queda libre.
+
+Los nombres de jugadores líderes se resaltan con color y el distintivo `✳` en las tarjetas de las jornadas.
 
 La versión de la aplicación aparece en la barra superior.
 
@@ -49,7 +51,7 @@ Abre **Clasificación** para ver partidos jugados, victorias, empates, derrotas 
 - Para volver a repartir, abre **El grupo** y pulsa **Recalcular pendientes**. Revisa la vista previa y confirma; los partidos terminados no se sustituyen.
 - Para borrar las jornadas y los resultados manteniendo el grupo, pulsa `↻` en la parte superior y confirma. También se reinicia el historial de disponibilidad para iniciar un torneo nuevo.
 - Antes de generar el torneo, `×` retira a una persona del grupo.
-- Durante el torneo, el formato y las cabezas de pista quedan fijados. Usa **Lesión / baja** o **Reincorporar** en la fila de cada persona para cambiar su disponibilidad sin borrar el historial.
+- Durante el torneo, el formato y los jugadores líderes quedan fijados. Usa **Lesión / baja** o **Reincorporar** en la fila de cada persona para cambiar su disponibilidad sin borrar el historial.
 
 ## Gestionar altas, lesiones y recálculo
 

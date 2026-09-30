@@ -1,12 +1,22 @@
 # Registro de cambios
 
+## [1.3.1] - 2026-09-30
+
+### Cambiado
+
+- La interfaz y el manual usan «jugador líder» en lugar de «cabeza».
+
+### Añadido
+
+- Los nombres de los jugadores líderes se resaltan en las tarjetas de partidos con color y distintivo.
+
 ## [1.3.0] - 2026-09-30
 
 ### Añadido
 
-- Selector para permitir partidos sin cabezas o exigir cabezas en ambos equipos de cada partido.
-- Generación que prioriza llenar las pistas compatibles, empareja cabezas de forma simétrica y rota los descansos para evitar jornadas consecutivas cuando sea posible.
-- Mayor prioridad de juego para las cabezas cuando la composición del grupo lo requiere.
+- Selector para permitir partidos sin jugadores líderes o exigir un líder en ambos equipos de cada partido.
+- Generación que prioriza llenar las pistas compatibles, empareja a los líderes de forma simétrica y rota los descansos para evitar jornadas consecutivas cuando sea posible.
+- Mayor prioridad de juego para los jugadores líderes cuando la composición del grupo lo requiere.
 
 ## [1.2.1] - 2026-09-30
 

@@ -68,8 +68,8 @@ const tutorialSteps = [
     icon: '＋',
     eyebrow: 'PRIMERO, EL GRUPO',
     title: 'Prepara quién juega.',
-    description: 'Añade a las personas, elige dobles o individual y ajusta las jornadas, pistas y regla de cabezas.',
-    tip: 'Puedes permitir partidos sin cabezas o pedir una cabeza en cada equipo. Nunca jugará una cabeza contra un equipo sin cabezas.'
+    description: 'Añade a las personas, elige dobles o individual y ajusta las jornadas, pistas y regla de jugadores líderes.',
+    tip: 'Puedes permitir partidos sin jugadores líderes o exigir uno en cada equipo. Nunca jugará un líder contra un equipo sin líderes.'
   },
   {
     icon: '↗',
@@ -101,6 +101,7 @@ function syncVisualViewportHeight() {
 }
 
 const playerNames = computed(() => new Map(players.value.map((player) => [player.id, player.name])))
+const leaderIds = computed(() => new Set(players.value.filter((player) => player.isCaptain).map((player) => player.id)))
 const finishedMatches = computed(() => rounds.value.flatMap((round) => round.matches).filter((match) => match.status === 'completed' && match.result !== null).length)
 const closedMatches = computed(() => rounds.value.flatMap((round) => round.matches).filter((match) => match.status === 'completed' || match.status === 'interrupted').length)
 const totalMatches = computed(() => rounds.value.reduce((total, round) => total + round.matches.length, 0))
@@ -326,7 +327,7 @@ function generate() {
 
   if (!rounds.value.length && !canGenerate.value) {
     if (captainPolicy.value === 'required' && canGenerateWithPlayers.value) {
-      notice.value = 'Has elegido cabezas en todos los partidos. Marca al menos dos cabezas de pista disponibles desde la misma jornada.'
+      notice.value = 'Has elegido jugadores líderes en todos los partidos. Marca al menos dos líderes disponibles desde la misma jornada.'
     } else {
       notice.value = mode.value === 'doubles' ? 'Añade al menos 4 jugadores para los partidos 2 × 2.' : 'Añade al menos 2 jugadores para los partidos 1 × 1.'
     }
@@ -474,6 +475,10 @@ function playerNamesFor(ids: string[]) {
   return ids.map((id) => playerNames.value.get(id) ?? 'Jugador').join(' · ')
 }
 
+function playerNameFor(id: string) {
+  return playerNames.value.get(id) ?? 'Jugador'
+}
+
 function exportStandings() {
   const canvas = document.createElement('canvas')
   const width = 1200
@@ -610,20 +615,20 @@ function resetTournament() {
               <div v-for="(player, index) in players" :key="player.id" class="player-row">
                 <span class="player-index">{{ (index + 1).toString().padStart(2, '0') }}</span><span class="player-name">{{ player.name }}</span>
                 <span v-if="rounds.length" class="availability-pill" :class="{ unavailable: !isAvailableAtRound(player, Math.max(1, activeRoundIndex + 1)) }">{{ availabilityLabel(player) }}</span>
-                <button type="button" class="captain-toggle" :class="{ captain: player.isCaptain }" :aria-pressed="player.isCaptain" :disabled="rounds.length > 0" :title="rounds.length ? 'La cabeza de pista queda fijada durante el torneo' : player.isCaptain ? 'Quitar cabeza de pista' : 'Marcar como cabeza de pista'" @click="player.isCaptain = !player.isCaptain"><span>✳</span> {{ player.isCaptain ? 'CABEZA' : 'MARCAR CABEZA' }}</button>
+                <button type="button" class="captain-toggle" :class="{ captain: player.isCaptain }" :aria-pressed="player.isCaptain" :disabled="rounds.length > 0" :title="rounds.length ? 'El rol de jugador líder queda fijado durante el torneo' : player.isCaptain ? 'Quitar jugador líder' : 'Marcar como jugador líder'" @click="player.isCaptain = !player.isCaptain"><span>✳</span> {{ player.isCaptain ? 'JUGADOR LÍDER' : 'MARCAR JUGADOR LÍDER' }}</button>
                 <button v-if="rounds.length" type="button" class="availability-action" @click="openAvailabilityDialog(player)">{{ availabilityAction(player) }}</button>
                 <button v-else type="button" class="remove-player" :aria-label="`Eliminar a ${player.name}`" @click="removePlayer(player.id)">×</button>
               </div>
             </div>
-            <div v-else class="empty-players"><span>＋</span><p>Tu lista empieza con un nombre.<br /><small>Las cabezas de pista nunca compartirán equipo.</small></p></div>
-            <div class="panel-footnote"><span class="footnote-star">✳</span><span>Marca a las cabezas de pista. En 2 × 2 siempre irán en equipos distintos.</span></div>
+            <div v-else class="empty-players"><span>＋</span><p>Tu lista empieza con un nombre.<br /><small>Los jugadores líderes se reparten entre ambos equipos.</small></p></div>
+            <div class="panel-footnote"><span class="footnote-star">✳</span><span>Marca a los jugadores líderes. En 2 × 2 habrá uno en cada equipo.</span></div>
           </article>
 
           <div class="settings-column">
             <article class="panel settings-panel">
               <div class="panel-heading"><div class="panel-number">B</div><div><h3>El plan de juego</h3><p>Tú pones los límites.</p></div></div>
               <fieldset class="mode-field"><legend>FORMATO DEL PARTIDO</legend><div class="segmented-control"><button type="button" :disabled="rounds.length > 0" :class="{ chosen: mode === 'doubles' }" @click="mode = 'doubles'"><span>2 × 2</span><small>Dobles</small></button><button type="button" :disabled="rounds.length > 0" :class="{ chosen: mode === 'singles' }" @click="mode = 'singles'"><span>1 × 1</span><small>Individual</small></button></div></fieldset>
-              <label class="captain-policy-field" for="captain-policy"><span>REGLA DE CABEZAS</span><select id="captain-policy" v-model="captainPolicy" :disabled="rounds.length > 0"><option value="optional">Permitir partidos sin cabezas</option><option value="required">Cabezas en todos los partidos</option></select><small v-if="rounds.length">La regla queda fijada durante el torneo.</small><small v-else-if="captainPolicy === 'optional'">Si una cabeza juega, habrá otra en el equipo contrario.</small><small v-else>Cada partido requiere al menos dos cabezas: una en cada equipo.</small></label>
+              <label class="captain-policy-field" for="captain-policy"><span>REGLA DE JUGADORES LÍDERES</span><select id="captain-policy" v-model="captainPolicy" :disabled="rounds.length > 0"><option value="optional">Permitir partidos sin líderes</option><option value="required">Líderes en todos los partidos</option></select><small v-if="rounds.length">La regla queda fijada durante el torneo.</small><small v-else-if="captainPolicy === 'optional'">Si participa un jugador líder, habrá otro en el equipo contrario.</small><small v-else>Cada partido requiere al menos dos líderes: uno en cada equipo.</small></label>
               <div class="number-settings"><label><span>JORNADAS</span><span class="number-input"><button type="button" aria-label="Menos jornadas" @click="roundCount = Math.max(rounds.length, 1, roundCount - 1)">−</button><input v-model.number="roundCount" type="number" min="1" max="60" /><button type="button" aria-label="Más jornadas" @click="roundCount = Math.min(60, roundCount + 1)">+</button></span></label><label><span>PISTAS</span><span class="number-input"><button type="button" aria-label="Menos pistas" @click="courtCount = Math.max(1, courtCount - 1)">−</button><input v-model.number="courtCount" type="number" min="1" max="12" /><button type="button" aria-label="Más pistas" @click="courtCount = Math.min(12, courtCount + 1)">+</button></span></label></div>
               <div class="points-note"><span>3</span><span>GANAR</span><span>·</span><span>2</span><span>EMPATAR</span><span>·</span><span>1</span><span>JUGAR Y PERDER</span></div>
             </article>
@@ -640,12 +645,12 @@ function resetTournament() {
         <p v-if="notice" class="notice" role="status">{{ notice }}</p>
         <template v-if="rounds[activeRoundIndex]">
           <div class="matches-meta"><span>JORNADA {{ (activeRoundIndex + 1).toString().padStart(2, '0') }} <i>—</i> {{ rounds[activeRoundIndex].matches.length }} {{ rounds[activeRoundIndex].matches.length === 1 ? 'PARTIDO' : 'PARTIDOS' }}</span><span v-if="rounds[activeRoundIndex].matches.length">Toca un resultado para guardarlo <b>↗</b></span></div>
-          <p v-if="rounds[activeRoundIndex].matches.length < courtCount" class="court-note">{{ courtCount - rounds[activeRoundIndex].matches.length }} {{ courtCount - rounds[activeRoundIndex].matches.length === 1 ? 'pista libre' : 'pistas libres' }} por disponibilidad, regla de cabezas o falta de cruces compatibles.</p>
-          <div v-if="!rounds[activeRoundIndex].matches.length" class="no-matches"><span>✳</span><h3>Esta jornada no tiene partidos.</h3><p>Con la disponibilidad y la regla de cabezas elegida no se puede formar un cruce compatible. Puedes incorporar a alguien o revisar la configuración.</p><button type="button" @click="activeView = 'setup'">GESTIONAR EL GRUPO ↗</button></div>
+          <p v-if="rounds[activeRoundIndex].matches.length < courtCount" class="court-note">{{ courtCount - rounds[activeRoundIndex].matches.length }} {{ courtCount - rounds[activeRoundIndex].matches.length === 1 ? 'pista libre' : 'pistas libres' }} por disponibilidad, regla de jugadores líderes o falta de cruces compatibles.</p>
+          <div v-if="!rounds[activeRoundIndex].matches.length" class="no-matches"><span>✳</span><h3>Esta jornada no tiene partidos.</h3><p>Con la disponibilidad y la regla de jugadores líderes elegida no se puede formar un cruce compatible. Puedes incorporar a alguien o revisar la configuración.</p><button type="button" @click="activeView = 'setup'">GESTIONAR EL GRUPO ↗</button></div>
           <div class="match-grid">
             <article v-for="match in rounds[activeRoundIndex].matches" :key="match.id" class="match-card" :class="{ settled: match.status === 'completed', interrupted: match.status === 'interrupted', inprogress: match.status === 'inProgress' }">
               <div class="match-card-top"><span>PISTA {{ match.court.toString().padStart(2, '0') }}</span><span>{{ mode === 'doubles' ? 'DOBLES · 2 × 2' : 'INDIVIDUAL · 1 × 1' }}</span></div>
-              <div class="teams"><div class="team" :class="{ winner: match.result === 'teamA' }"><div class="team-label"><span>EQUIPO A</span><b v-if="match.result === 'teamA'">GANADOR ✳</b></div><strong>{{ playerNamesFor(match.teamA) }}</strong></div><div class="vs-mark">VS</div><div class="team team-b" :class="{ winner: match.result === 'teamB' }"><div class="team-label"><span>EQUIPO B</span><b v-if="match.result === 'teamB'">GANADOR ✳</b></div><strong>{{ playerNamesFor(match.teamB) }}</strong></div></div>
+              <div class="teams"><div class="team" :class="{ winner: match.result === 'teamA' }"><div class="team-label"><span>EQUIPO A</span><b v-if="match.result === 'teamA'">GANADOR ✳</b></div><strong class="team-player-names"><template v-for="(id, index) in match.teamA" :key="id"><span class="team-player-name" :class="{ 'leader-player': leaderIds.has(id) }">{{ playerNameFor(id) }}<span v-if="leaderIds.has(id)" class="leader-player-mark" aria-hidden="true"> ✳</span><span v-if="leaderIds.has(id)" class="sr-only">, jugador líder</span></span><span v-if="index < match.teamA.length - 1" class="team-player-separator" aria-hidden="true">·</span></template></strong></div><div class="vs-mark">VS</div><div class="team team-b" :class="{ winner: match.result === 'teamB' }"><div class="team-label"><span>EQUIPO B</span><b v-if="match.result === 'teamB'">GANADOR ✳</b></div><strong class="team-player-names"><template v-for="(id, index) in match.teamB" :key="id"><span class="team-player-name" :class="{ 'leader-player': leaderIds.has(id) }">{{ playerNameFor(id) }}<span v-if="leaderIds.has(id)" class="leader-player-mark" aria-hidden="true"> ✳</span><span v-if="leaderIds.has(id)" class="sr-only">, jugador líder</span></span><span v-if="index < match.teamB.length - 1" class="team-player-separator" aria-hidden="true">·</span></template></strong></div></div>
               <div v-if="match.status === 'scheduled'" class="match-controls"><button type="button" @click="startMatch(match)">▶ MARCAR EN JUEGO</button></div>
               <div v-else-if="match.status === 'inProgress'" class="match-controls"><button type="button" class="interrupt-button" @click="interruptMatch(match)">MARCAR INTERRUMPIDO</button></div>
               <div v-else class="match-controls"><button type="button" class="reopen-button" @click="resetMatch(match)">{{ match.status === 'interrupted' ? '↻ REINTENTAR PARTIDO' : '↻ REABRIR PARTIDO' }}</button></div>
@@ -661,7 +666,7 @@ function resetTournament() {
       <section v-else class="workspace standings-view">
         <div class="section-heading standings-heading"><div><span class="section-kicker">03 / LA TABLA</span><h2>Los puntos<br />sobre la mesa.</h2><p>Cada partido suma. Toda la cuadrilla cuenta.</p></div><div class="winner-seal"><span>✳</span><small>BUEN<br />JUEGO<br />ANTE TODO</small></div></div>
         <div class="standings-toolbar"><div><strong>{{ standings.length.toString().padStart(2, '0') }}</strong><span>JUGADORES</span><i>·</i><strong>{{ roundsCompleted.toString().padStart(2, '0') }}</strong><span>JORNADAS COMPLETADAS</span></div><button type="button" @click="exportStandings"><span>↓</span> DESCARGAR IMAGEN PNG</button></div>
-         <div class="standings-table-wrap"><table class="standings-table"><thead><tr><th scope="col">POS.</th><th scope="col">JUGADOR / A</th><th scope="col">PJ</th><th scope="col">G</th><th scope="col">E</th><th scope="col">P</th><th scope="col">PTS</th></tr></thead><tbody><tr v-for="(row, index) in standings" :key="row.player.id" :class="{ podium: index === 0 }"><td data-label="Pos."><span class="rank" :class="{ gold: index === 0 }">{{ (index + 1).toString().padStart(2, '0') }}</span></td><td data-label="Jugador/a"><div class="standing-player"><strong>{{ row.player.name }}</strong><span v-if="row.player.isCaptain">✳ CABEZA DE PISTA</span><span v-if="!isAvailableAtRound(row.player, Math.max(1, activeRoundIndex + 1))" class="standing-unavailable">NO DISPONIBLE</span></div></td><td data-label="PJ">{{ row.played }}</td><td data-label="G">{{ row.wins }}</td><td data-label="E">{{ row.draws }}</td><td data-label="P">{{ row.losses }}</td><td data-label="PTS"><strong class="points-cell">{{ row.points }}</strong></td></tr></tbody></table></div>
+          <div class="standings-table-wrap"><table class="standings-table"><thead><tr><th scope="col">POS.</th><th scope="col">JUGADOR / A</th><th scope="col">PJ</th><th scope="col">G</th><th scope="col">E</th><th scope="col">P</th><th scope="col">PTS</th></tr></thead><tbody><tr v-for="(row, index) in standings" :key="row.player.id" :class="{ podium: index === 0 }"><td data-label="Pos."><span class="rank" :class="{ gold: index === 0 }">{{ (index + 1).toString().padStart(2, '0') }}</span></td><td data-label="Jugador/a"><div class="standing-player"><strong>{{ row.player.name }}</strong><span v-if="row.player.isCaptain">✳ JUGADOR LÍDER</span><span v-if="!isAvailableAtRound(row.player, Math.max(1, activeRoundIndex + 1))" class="standing-unavailable">NO DISPONIBLE</span></div></td><td data-label="PJ">{{ row.played }}</td><td data-label="G">{{ row.wins }}</td><td data-label="E">{{ row.draws }}</td><td data-label="P">{{ row.losses }}</td><td data-label="PTS"><strong class="points-cell">{{ row.points }}</strong></td></tr></tbody></table></div>
         <div class="scoring-legend"><span><b>G</b> GANADOS · 3 PTS</span><i>✳</i><span><b>E</b> EMPATADOS · 2 PTS</span><i>✳</i><span><b>P</b> PERDIDOS · 1 PT</span></div>
         <div class="matches-bottom"><button type="button" class="text-link" @click="activeView = 'matches'">← VOLVER A LAS JORNADAS</button><button type="button" class="primary-small" @click="activeView = 'setup'">REPARTIR DE NUEVO <span>↗</span></button></div>
         <footer class="page-footer"><span>REPARTIDOR CLUB © 2026</span><span>HECHO PARA COMPARTIR CANCHA <b>♥</b></span></footer>
@@ -715,7 +720,7 @@ function resetTournament() {
         <p>Los partidos finalizados mantienen equipos, resultados y puntos. Solo se redistribuyen los partidos pendientes desde la jornada indicada.</p>
         <div v-if="recalculationProposal.schedule.inProgressMatches.length" class="preview-blocker" role="alert"><strong>Hay partidos en juego.</strong><span>Registra el resultado o vuelve a jornadas y márcalos como interrumpidos antes de recalcular.</span><span v-for="match in recalculationProposal.schedule.inProgressMatches" :key="match.id">Pista {{ match.court }} · {{ playerNamesFor([...match.teamA, ...match.teamB]) }}</span></div>
         <div class="preview-counts"><div><strong>{{ recalculationProposal.schedule.preservedMatches }}</strong><span>PARTIDOS<br />CONSERVADOS</span></div><div><strong>{{ recalculationProposal.schedule.removedMatches }}</strong><span>PENDIENTES<br />A REPARTIR</span></div><div><strong>{{ recalculationProposal.schedule.generatedMatches }}</strong><span>NUEVOS<br />PARTIDOS</span></div></div>
-        <p v-if="recalculationProposal.schedule.skippedCourts" class="preview-note">{{ recalculationProposal.schedule.skippedCourts }} pistas quedarán libres por disponibilidad, capacidad, regla de cabezas o falta de cruces compatibles.</p>
+        <p v-if="recalculationProposal.schedule.skippedCourts" class="preview-note">{{ recalculationProposal.schedule.skippedCourts }} pistas quedarán libres por disponibilidad, capacidad, regla de jugadores líderes o falta de cruces compatibles.</p>
         <div class="preview-load"><h3>Partidos jugados + previstos</h3><div v-for="row in proposalRows(recalculationProposal)" :key="row.player.id" class="preview-load-row"><span>{{ row.player.name }} <small v-if="!row.available">NO DISPONIBLE</small></span><strong>{{ row.projected }}</strong></div></div>
         <p class="preview-footnote">Se equilibra la carga de partidos; no se exige descanso entre jornadas. Cada persona jugará como máximo una vez por jornada.</p>
         <div class="modal-actions"><button type="button" class="text-link" @click="cancelRecalculation">CANCELAR</button><button type="button" class="primary-small" :disabled="recalculationProposal.schedule.inProgressMatches.length > 0" @click="confirmRecalculation">CONFIRMAR Y RECALCULAR <span>↗</span></button></div>
@@ -767,4 +772,10 @@ function resetTournament() {
 .captain-policy-field select:disabled{opacity:.62}
 .captain-policy-field small{color:#81877f;font:9px/1.5 'DM Sans',sans-serif;letter-spacing:0}
 @media(max-width:719px){.captain-policy-field select{min-height:44px;font-size:16px}}
+.captain-toggle{max-width:100%;white-space:normal;line-height:1.35;text-align:left}
+.team-player-names{display:flex;min-width:0;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 5px}
+.team-player-name{overflow-wrap:anywhere}
+.team-player-name.leader-player{color:#b85f42;font-weight:800;text-decoration:underline;text-decoration-color:#e2b4a2;text-decoration-thickness:1px;text-underline-offset:2px}
+.leader-player-mark{color:#dd7959;font-size:.8em}
+.team-player-separator{color:#92998d}
 </style>
