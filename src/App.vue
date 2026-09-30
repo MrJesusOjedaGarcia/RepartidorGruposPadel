@@ -69,7 +69,7 @@ const tutorialSteps = [
     eyebrow: 'PRIMERO, EL GRUPO',
     title: 'Prepara quién juega.',
     description: 'Añade a las personas, elige dobles o individual y ajusta las jornadas, pistas y regla de jugadores líderes.',
-    tip: 'Puedes permitir partidos sin jugadores líderes o exigir uno en cada equipo. Nunca jugará un líder contra un equipo sin líderes.'
+    tip: 'Puedes permitir jornadas con pistas con y sin líderes, o exigir uno en cada equipo. Nunca jugará un líder contra un equipo sin líderes.'
   },
   {
     icon: '↗',
@@ -648,7 +648,7 @@ function resetTournament() {
             <article class="panel settings-panel">
               <div class="panel-heading"><div class="panel-number">B</div><div><h3>El plan de juego</h3><p>Tú pones los límites.</p></div></div>
               <fieldset class="mode-field"><legend>FORMATO DEL PARTIDO</legend><div class="segmented-control"><button type="button" :disabled="rounds.length > 0" :class="{ chosen: mode === 'doubles' }" @click="mode = 'doubles'"><span>2 × 2</span><small>Dobles</small></button><button type="button" :disabled="rounds.length > 0" :class="{ chosen: mode === 'singles' }" @click="mode = 'singles'"><span>1 × 1</span><small>Individual</small></button></div></fieldset>
-              <label class="captain-policy-field" for="captain-policy"><span>REGLA DE JUGADORES LÍDERES</span><select id="captain-policy" v-model="captainPolicy" :disabled="rounds.length > 0"><option value="optional">Permitir partidos sin líderes</option><option value="required">Líderes en todos los partidos</option></select><small v-if="rounds.length">La regla queda fijada durante el torneo.</small><small v-else-if="captainPolicy === 'optional'">Si participa un jugador líder, habrá otro en el equipo contrario.</small><small v-else>Cada partido requiere al menos dos líderes: uno en cada equipo.</small></label>
+              <label class="captain-policy-field" for="captain-policy"><span>REGLA DE JUGADORES LÍDERES</span><select id="captain-policy" v-model="captainPolicy" :disabled="rounds.length > 0"><option value="optional">Permitir jornadas sin líderes</option><option value="required">Líderes en todos los partidos</option></select><small v-if="rounds.length">La regla queda fijada durante el torneo.</small><small v-else-if="captainPolicy === 'optional'">Cada jornada puede mezclar partidos con líderes y sin ellos; si juega un líder, habrá otro en el equipo rival.</small><small v-else>Cada partido requiere al menos dos líderes: uno en cada equipo.</small></label>
               <div class="number-settings"><label><span>JORNADAS</span><span class="number-input"><button type="button" aria-label="Menos jornadas" @click="roundCount = Math.max(rounds.length, 1, roundCount - 1)">−</button><input v-model.number="roundCount" type="number" min="1" max="60" /><button type="button" aria-label="Más jornadas" @click="roundCount = Math.min(60, roundCount + 1)">+</button></span></label><label><span>PISTAS</span><span class="number-input"><button type="button" aria-label="Menos pistas" @click="courtCount = Math.max(1, courtCount - 1)">−</button><input v-model.number="courtCount" type="number" min="1" max="12" /><button type="button" aria-label="Más pistas" @click="courtCount = Math.min(12, courtCount + 1)">+</button></span></label></div>
               <div class="points-note"><span>3</span><span>GANAR</span><span>·</span><span>2</span><span>EMPATAR</span><span>·</span><span>1</span><span>JUGAR Y PERDER</span></div>
             </article>

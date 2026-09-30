@@ -132,7 +132,9 @@ describe('schedule generation and recalculation', () => {
         expect(round.matches).toHaveLength(2)
         assertNoRepeatedPlayersInRound(round)
         const playing = new Set(round.matches.flatMap((match) => [...match.teamA, ...match.teamB]))
-        expect([...playing].filter((id) => players.find((player) => player.id === id)?.isCaptain)).toHaveLength(4)
+        const playingLeaders = [...playing].filter((id) => players.find((player) => player.id === id)?.isCaptain)
+        expect(playingLeaders).toHaveLength(2)
+        expect(round.matches.filter((match) => [...match.teamA, ...match.teamB].some((id) => players.find((player) => player.id === id)?.isCaptain))).toHaveLength(1)
         for (const match of round.matches) {
           const captainsA = match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
           const captainsB = match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
@@ -145,7 +147,12 @@ describe('schedule generation and recalculation', () => {
           .filter((id) => !players.find((player) => player.id === id)?.isCaptain))
         const currentNonCaptains = result.rounds[index].matches.flatMap((match) => [...match.teamA, ...match.teamB])
           .filter((id) => !players.find((player) => player.id === id)?.isCaptain)
-        expect(currentNonCaptains.some((id) => previousNonCaptains.has(id))).toBe(false)
+        expect(currentNonCaptains.filter((id) => previousNonCaptains.has(id))).toHaveLength(4)
+        const previousLeaders = new Set(result.rounds[index - 1].matches.flatMap((match) => [...match.teamA, ...match.teamB])
+          .filter((id) => players.find((player) => player.id === id)?.isCaptain))
+        const currentLeaders = result.rounds[index].matches.flatMap((match) => [...match.teamA, ...match.teamB])
+          .filter((id) => players.find((player) => player.id === id)?.isCaptain)
+        expect(currentLeaders.some((id) => previousLeaders.has(id))).toBe(false)
       }
     }
   })

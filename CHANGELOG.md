@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## [1.3.3] - 2026-09-30
+
+### Cambiado
+
+- La opción flexible se describe como «Permitir jornadas sin líderes» y distribuye los partidos con líderes y sin ellos de forma intercalada cuando es posible.
+- Se rota la participación de los jugadores líderes para evitar concentrar sus partidos al principio del calendario.
+
 ## [1.3.2] - 2026-09-30
 
 ### Añadido
