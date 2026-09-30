@@ -199,10 +199,10 @@ function findDoublesGame(
         tieBreaker: Math.random()
       }
       const current = best.value
-      const candidateRank = [candidate.unfilledFutureCourts, candidate.captainModeImbalance, candidate.consecutiveNonCaptains, candidate.consecutiveCaptains, candidate.repeatedPartnerships, candidate.repeatedEncounters, candidate.maxAppearances, candidate.totalAppearances]
+      const candidateRank = [candidate.unfilledFutureCourts, candidate.maxAppearances, candidate.totalAppearances, candidate.captainModeImbalance, candidate.consecutiveNonCaptains, candidate.consecutiveCaptains, candidate.repeatedPartnerships, candidate.repeatedEncounters]
       let isBetter = !current
       if (current) {
-        const currentRank = [current.unfilledFutureCourts, current.captainModeImbalance, current.consecutiveNonCaptains, current.consecutiveCaptains, current.repeatedPartnerships, current.repeatedEncounters, current.maxAppearances, current.totalAppearances]
+        const currentRank = [current.unfilledFutureCourts, current.maxAppearances, current.totalAppearances, current.captainModeImbalance, current.consecutiveNonCaptains, current.consecutiveCaptains, current.repeatedPartnerships, current.repeatedEncounters]
         const rankDifference = candidateRank.findIndex((value, index) => value !== currentRank[index])
         isBetter = rankDifference < 0
           ? candidate.tieBreaker < current.tieBreaker
@@ -279,11 +279,13 @@ function findSinglesGame(
       })
     }
   }
-  candidates.sort((a, b) => a.captainModeImbalance - b.captainModeImbalance ||
+  candidates.sort((a, b) => a.maxAppearances - b.maxAppearances ||
+    a.appearances - b.appearances ||
+    a.captainModeImbalance - b.captainModeImbalance ||
     a.consecutiveNonCaptains - b.consecutiveNonCaptains ||
     a.consecutiveCaptains - b.consecutiveCaptains ||
-    a.appearances - b.appearances ||
-    a.maxAppearances - b.maxAppearances)
+    a.first.localeCompare(b.first) ||
+    a.second.localeCompare(b.second))
   let match = shuffled(candidates.slice(0, Math.max(1, Math.min(12, candidates.length))))[0]
   if (remainingCourtsAfterCurrent > 0 && candidates.length) {
     const searchCandidates = available.length <= 24 ? candidates : candidates.slice(0, 128)
@@ -475,6 +477,7 @@ function buildScheduleAttempt(
 function isBetterAttempt(candidate: ScheduleAttempt, current: ScheduleAttempt | null): boolean {
   if (!current) return true
   if (candidate.generatedMatches !== current.generatedMatches) return candidate.generatedMatches > current.generatedMatches
+  if (candidate.appearanceSpread !== current.appearanceSpread) return candidate.appearanceSpread < current.appearanceSpread
   if (candidate.captainModeImbalance !== current.captainModeImbalance) return candidate.captainModeImbalance < current.captainModeImbalance
   if (candidate.consecutiveNonCaptainAppearances !== current.consecutiveNonCaptainAppearances) return candidate.consecutiveNonCaptainAppearances < current.consecutiveNonCaptainAppearances
   if (candidate.consecutiveCaptainAppearances !== current.consecutiveCaptainAppearances) return candidate.consecutiveCaptainAppearances < current.consecutiveCaptainAppearances
@@ -483,7 +486,6 @@ function isBetterAttempt(candidate: ScheduleAttempt, current: ScheduleAttempt | 
   if (candidateNewPartnerships !== currentNewPartnerships) return candidateNewPartnerships > currentNewPartnerships
   if (candidate.repeatedPartnerships !== current.repeatedPartnerships) return candidate.repeatedPartnerships < current.repeatedPartnerships
   if (candidate.repeatedEncounters !== current.repeatedEncounters) return candidate.repeatedEncounters < current.repeatedEncounters
-  if (candidate.appearanceSpread !== current.appearanceSpread) return candidate.appearanceSpread < current.appearanceSpread
   return candidate.tieBreaker < current.tieBreaker
 }
 

@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## [1.3.4] - 2026-09-30
+
+### Cambiado
+
+- El equilibrio del total de partidos tiene prioridad sobre los descansos y la alternancia de partidos con/sin líderes.
+- Los líderes ya no quedan sistemáticamente en menos partidos; las jornadas consecutivas se permiten cuando ayudan a igualar las apariciones.
+
 ## [1.3.3] - 2026-09-30
 
 ### Cambiado

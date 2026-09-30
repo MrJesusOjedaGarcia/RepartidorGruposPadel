@@ -28,7 +28,7 @@ La regla de jugadores líderes se guarda en el dispositivo y queda fijada al cre
 
 Para vaciar la lista, pulsa **Eliminar todos los jugadores** debajo de los nombres y confirma. Si ya hay jornadas, también se borrarán los partidos y resultados del torneo.
 
-El reparto prioriza llenar todas las pistas que admitan partidos compatibles, intercala jornadas con y sin partidos de líderes y rota sus apariciones para evitar concentrarlas al principio. También rota los descansos para evitar que una persona juegue dos jornadas seguidas si puede mantener la misma cantidad de partidos. Cada persona juega como máximo una vez por jornada.
+El reparto prioriza llenar todas las pistas compatibles y mantener un número similar de partidos para todas las personas, incluidos los jugadores líderes. Para equilibrar esa cantidad puede asignar jornadas consecutivas en vez de dejar a alguien descansando sin necesidad. Los partidos con líderes y sin ellos se intercalan a lo largo de las jornadas cuando no perjudica el equilibrio. Cada persona juega como máximo una vez por jornada.
 
 En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Si la disponibilidad, la regla elegida para los jugadores líderes o los cruces posibles no permiten ocupar una pista, queda libre.
 

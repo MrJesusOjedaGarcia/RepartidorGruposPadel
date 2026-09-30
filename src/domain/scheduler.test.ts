@@ -123,37 +123,28 @@ describe('schedule generation and recalculation', () => {
     expect(new Set(playingIds).size).toBe(players.length)
   })
 
-  it('fills both doubles courts and rotates non-captain rests when the group permits it', () => {
+  it('fills both courts, balances appearances and mixes matches with and without leaders', () => {
     const players = makePlayers(12, 4)
     for (const seed of [13, 404, 2026]) {
       const result = withRandomSeed(seed, () => generateSchedule(players, 5, 2, 'doubles'))
+      const appearances = new Map(players.map((player) => [player.id, 0]))
+      let sawMixedRound = false
 
       for (const round of result.rounds) {
         expect(round.matches).toHaveLength(2)
         assertNoRepeatedPlayersInRound(round)
-        const playing = new Set(round.matches.flatMap((match) => [...match.teamA, ...match.teamB]))
-        const playingLeaders = [...playing].filter((id) => players.find((player) => player.id === id)?.isCaptain)
-        expect(playingLeaders).toHaveLength(2)
-        expect(round.matches.filter((match) => [...match.teamA, ...match.teamB].some((id) => players.find((player) => player.id === id)?.isCaptain))).toHaveLength(1)
+        const headedMatches = round.matches.filter((match) => [...match.teamA, ...match.teamB].some((id) => players.find((player) => player.id === id)?.isCaptain)).length
+        if (headedMatches > 0 && headedMatches < round.matches.length) sawMixedRound = true
         for (const match of round.matches) {
           const captainsA = match.teamA.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
           const captainsB = match.teamB.filter((id) => players.find((player) => player.id === id)?.isCaptain).length
           expect(captainsA).toBe(captainsB)
+          for (const id of [...match.teamA, ...match.teamB]) appearances.set(id, (appearances.get(id) ?? 0) + 1)
         }
       }
 
-      for (let index = 1; index < result.rounds.length; index += 1) {
-        const previousNonCaptains = new Set(result.rounds[index - 1].matches.flatMap((match) => [...match.teamA, ...match.teamB])
-          .filter((id) => !players.find((player) => player.id === id)?.isCaptain))
-        const currentNonCaptains = result.rounds[index].matches.flatMap((match) => [...match.teamA, ...match.teamB])
-          .filter((id) => !players.find((player) => player.id === id)?.isCaptain)
-        expect(currentNonCaptains.filter((id) => previousNonCaptains.has(id))).toHaveLength(4)
-        const previousLeaders = new Set(result.rounds[index - 1].matches.flatMap((match) => [...match.teamA, ...match.teamB])
-          .filter((id) => players.find((player) => player.id === id)?.isCaptain))
-        const currentLeaders = result.rounds[index].matches.flatMap((match) => [...match.teamA, ...match.teamB])
-          .filter((id) => players.find((player) => player.id === id)?.isCaptain)
-        expect(currentLeaders.some((id) => previousLeaders.has(id))).toBe(false)
-      }
+      expect(sawMixedRound).toBe(true)
+      expect(Math.max(...appearances.values()) - Math.min(...appearances.values())).toBeLessThanOrEqual(1)
     }
   })
 
