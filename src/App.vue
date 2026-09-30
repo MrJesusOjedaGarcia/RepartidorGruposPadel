@@ -75,8 +75,8 @@ const tutorialSteps = [
     icon: '↗',
     eyebrow: 'DESPUÉS, A REPARTIR',
     title: 'Genera las jornadas.',
-    description: 'Pulsa «Generar jornadas» y la aplicación intentará ocupar todas las pistas compatibles y alternar los descansos.',
-    tip: 'Busca compañeros nuevos y cruces variados; solo repite pareja cuando no queda una combinación compatible.'
+    description: 'Pulsa «Generar jornadas» y la aplicación intentará ocupar todas las pistas y equilibrar el número de partidos, aunque tengas que jugar jornadas seguidas.',
+    tip: 'Busca compañeros nuevos y cruces variados; puede repetir pareja si eso ayuda a igualar los partidos.'
   },
   {
     icon: '3',

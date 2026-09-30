@@ -1,5 +1,13 @@
 # Registro de cambios
 
+## [1.3.6] - 2026-09-30
+
+### Corregido
+
+- En grupos largos se equilibra también la media de partidos de líderes y no líderes; la equidad tiene prioridad sobre evitar una pareja repetida.
+- La búsqueda compara cruces nuevos y repetidos dentro del mismo conjunto de alternativas para no dejar a los líderes varios partidos por detrás.
+- Añadida una regresión de 12 jugadores, 4 líderes, 2 pistas y 16 jornadas, además de calendarios pares e impares.
+
 ## [1.3.5] - 2026-09-30
 
 ### Cambiado

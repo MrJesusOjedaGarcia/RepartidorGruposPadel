@@ -12,7 +12,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 
 1. Permitir añadir y retirar participantes y señalar cualquier cantidad de jugadores líderes. Como máximo habrá un líder en cada equipo y la cantidad de líderes será igual en ambos lados del partido.
 2. Permitir elegir partidos 2 × 2 o 1 × 1, cantidad de jornadas y número de pistas disponibles.
-3. En cada jornada, ocupar todas las pistas para las que exista una combinación simultánea compatible, considerando juntas las pistas libres para no dejar una vacía por una elección voraz en otra. Priorizar parejas nuevas y cruces variados una vez asegurada la capacidad de juego.
+3. En cada jornada, ocupar todas las pistas para las que exista una combinación simultánea compatible, considerando juntas las pistas libres para no dejar una vacía por una elección voraz en otra. Después equilibrar el número de partidos por persona y la media de participación de líderes frente al resto; priorizar parejas nuevas y cruces variados cuando no perjudique ese equilibrio.
 4. Equilibrar el número total de partidos entre todos los participantes, incluidos los líderes. Se acepta jugar jornadas consecutivas antes que dejar a una persona con menos partidos cuando hay capacidad para asignarla.
 5. Una persona no puede estar asignada a más de un partido en la misma jornada.
 6. Permitir seleccionar antes de generar si una jornada puede incluir partidos sin jugadores líderes o si todos los partidos deben tener líderes en ambos equipos. Con la opción flexible, intercalar partidos con líderes y sin ellos en la jornada y a lo largo del calendario cuando sea compatible con el equilibrio de partidos. La elección se conserva con la configuración del torneo.
@@ -48,7 +48,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - No hay límite global de jugadores líderes; ningún equipo puede contener más de uno.
 - En todos los partidos, ambos equipos tienen la misma cantidad de jugadores líderes: o ninguno o uno en cada equipo. Nunca se enfrenta a un líder contra un equipo sin líderes.
 - Si se activa «Jugadores líderes en todos los partidos», cada cruce debe tener exactamente un líder en cada equipo; las pistas que no admitan ese formato quedan libres.
-- Las parejas de compañeros se mantienen inéditas mientras exista una combinación compatible; solo se repiten cuando ya no puede formarse otro partido con parejas nuevas, y entonces se minimiza el número de repeticiones.
+- Se priorizan compañeros y cruces nuevos entre asignaciones con una carga de partidos similar. Se permite repetir una pareja si eso es necesario para equilibrar las apariciones o llenar una pista; entre alternativas igual de equilibradas se elige la que tenga menos repeticiones.
 - Los partidos interrumpidos quedan diferenciados de los pendientes y los completados; no suman puntos.
 - Un partido completado/interrumpido puede reabrirse expresamente; vuelve a pendiente y deja de bloquear a sus participantes en esa jornada hasta que se juegue o cierre de nuevo.
 - La clasificación considera resultados completados. Los participantes con cambios de estado permanecen en la tabla y mantienen sus puntos históricos.
@@ -81,11 +81,11 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 5. Ninguna persona queda asignada a dos partidos en la misma jornada; ningún partido enfrenta a un jugador líder con un equipo rival sin líderes.
 6. Cancelar la confirmación no altera el calendario vigente. Las jornadas y la clasificación informan de partidos interrumpidos o pistas libres.
 7. Se pueden marcar tres o más jugadores líderes en el grupo. En cada partido hay un líder en ambos equipos o ninguno; nunca se juntan dos líderes en un mismo equipo.
-8. Con 5 participantes disponibles, una pista y 5 jornadas, el reparto puede usar las 10 parejas posibles una sola vez. Cuando ya no queden parejas inéditas compatibles, se prioriza llenar las pistas con el mínimo de repeticiones.
+8. Con 5 participantes disponibles, una pista y 5 jornadas, el reparto puede usar las 10 parejas posibles una sola vez manteniendo la carga igualada. Si repetir una pareja mejora el equilibrio de partidos o permite llenar una pista, se permite; entre repartos igual de equilibrados se minimizan las repeticiones.
 9. La versión SemVer mostrada en la aplicación coincide con `package.json` y el lockfile; cada versión publicada queda anotada en `CHANGELOG.md` y etiquetada en Git.
 10. En la primera visita aparece un tutorial corto con anterior/siguiente y omitir/cerrar; se puede reabrir desde Ayuda y funciona con teclado y pantalla táctil en móvil, tablet y escritorio.
 11. Reabrir un partido completado pide confirmación y, al aceptarla, retira sus puntos y deja el partido pendiente con los mismos equipos/pista; reabrir uno interrumpido también lo deja pendiente y permite iniciarlo otra vez.
-12. Con 12 participantes, 4 jugadores líderes y 2 pistas, se ocupan ambas pistas y, con la opción flexible, se intercalan partidos con líderes y sin ellos. El número total de partidos por persona —incluidos los líderes— se mantiene lo más igualado posible, aunque esto requiera jornadas consecutivas.
+12. Con 12 participantes, 4 jugadores líderes y 2 pistas, se ocupan ambas pistas y, con la opción flexible, se intercalan partidos con líderes y sin ellos. En 16 jornadas, el número de partidos por persona se mantiene dentro de una diferencia de uno y la media de líderes frente al resto no difiere más de medio partido, aunque haga falta repetir compañeros o jugar jornadas consecutivas. Se verifica también con cantidades pares e impares de jornadas.
 13. El selector permite jornadas con partidos sin líderes o exigir líderes en todos los partidos. Con la opción estricta, solo se genera un partido cuando puede asignarse un líder a cada equipo.
 14. Los nombres de los jugadores líderes aparecen resaltados en las tarjetas de las jornadas y se indica su rol con texto accesible; la interfaz utiliza el término «jugador líder».
 15. El botón de eliminación masiva pide confirmación. Sin torneo, limpia la lista; con un torneo, limpia también jornadas, partidos y resultados, y vuelve a la configuración.

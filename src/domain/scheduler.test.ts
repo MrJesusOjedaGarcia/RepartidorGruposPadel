@@ -153,6 +153,24 @@ describe('schedule generation and recalculation', () => {
     }
   })
 
+  it('keeps leaders and other players balanced over 16 rounds with 12 participants', () => {
+    const players = makePlayers(12, 4)
+    for (const seed of [13, 404, 2026]) {
+      const result = withRandomSeed(seed, () => generateSchedule(players, 16, 2, 'doubles', 'optional'))
+      const appearances = new Map(players.map((player) => [player.id, 0]))
+      expect(result.rounds).toHaveLength(16)
+      expect(result.rounds.every((round) => round.matches.length === 2)).toBe(true)
+      for (const match of result.rounds.flatMap((round) => round.matches)) {
+        for (const id of [...match.teamA, ...match.teamB]) appearances.set(id, (appearances.get(id) ?? 0) + 1)
+      }
+      const counts = Object.fromEntries(appearances)
+      const leaderAverage = players.filter((player) => player.isCaptain).reduce((total, player) => total + appearances.get(player.id)!, 0) / 4
+      const otherAverage = players.filter((player) => !player.isCaptain).reduce((total, player) => total + appearances.get(player.id)!, 0) / 8
+      expect(Math.max(...appearances.values()) - Math.min(...appearances.values()), JSON.stringify(counts)).toBeLessThanOrEqual(1)
+      expect(Math.abs(leaderAverage - otherAverage), JSON.stringify(counts)).toBeLessThanOrEqual(0.5)
+    }
+  })
+
   it('fills every compatible doubles court even when a round mixes headed and headless matches', () => {
     const players = makePlayers(12, 4)
     const result = generateSchedule(players, 3, 3, 'doubles', 'optional')

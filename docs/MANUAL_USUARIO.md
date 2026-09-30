@@ -30,7 +30,7 @@ Para vaciar la lista, pulsa **Eliminar todos los jugadores** debajo de los nombr
 
 El reparto prioriza llenar todas las pistas compatibles y mantener un número similar de partidos para todas las personas, incluidos los jugadores líderes. Para equilibrar esa cantidad puede asignar jornadas consecutivas en vez de dejar a alguien descansando sin necesidad. Los partidos con líderes y sin ellos se intercalan a lo largo de las jornadas cuando no perjudica el equilibrio. Cada persona juega como máximo una vez por jornada.
 
-En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Si la disponibilidad, la regla elegida para los jugadores líderes o los cruces posibles no permiten ocupar una pista, queda libre.
+En dobles, el reparto busca compañeros nuevos y cruces con personas que aún no se han enfrentado. Puede repetir una pareja si lo necesita para equilibrar el número de partidos entre todos o para ocupar las pistas; entre alternativas con un reparto igual de equilibrado, prefiere la que repita menos. En individual, ningún duelo se repite. Si la disponibilidad, la regla elegida para los jugadores líderes o los cruces posibles no permiten ocupar una pista, queda libre.
 
 Los nombres de jugadores líderes se resaltan con color y el distintivo `✳` en las tarjetas de las jornadas.
 
