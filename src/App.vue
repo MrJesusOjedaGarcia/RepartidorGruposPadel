@@ -4,6 +4,7 @@ import {
   generateSchedule,
   isAvailableAtRound,
   recalculateSchedule,
+  reopenMatch as reopenMatchState,
   withAvailabilityChange,
   type AvailabilityChange,
   type Match,
@@ -341,6 +342,17 @@ function interruptMatch(match: Match) {
   notice.value = 'Partido marcado como interrumpido. No suma puntos y sus participantes descansan el resto de esta jornada.'
 }
 
+function resetMatch(match: Match) {
+  if (match.status !== 'completed' && match.status !== 'interrupted') return
+  const completed = match.status === 'completed'
+  const confirmation = completed
+    ? '¿Quieres reabrir este partido? Se borrará el resultado y dejará de sumar puntos hasta que vuelvas a cerrarlo.'
+    : '¿Quieres reiniciar este partido interrumpido? Volverá a quedar pendiente para poder jugarlo o registrar su resultado.'
+  if (!window.confirm(confirmation)) return
+  Object.assign(match, reopenMatchState(match))
+  notice.value = 'Partido reabierto; vuelve a estar pendiente.'
+}
+
 function openAvailabilityDialog(player: Player) {
   const effectiveRound = Math.min(maxEditableRound.value, Math.max(firstEditableRound.value, 1))
   availabilityDialog.value = { playerId: player.id }
@@ -617,7 +629,8 @@ function resetTournament() {
               <div class="teams"><div class="team" :class="{ winner: match.result === 'teamA' }"><div class="team-label"><span>EQUIPO A</span><b v-if="match.result === 'teamA'">GANADOR ✳</b></div><strong>{{ playerNamesFor(match.teamA) }}</strong></div><div class="vs-mark">VS</div><div class="team team-b" :class="{ winner: match.result === 'teamB' }"><div class="team-label"><span>EQUIPO B</span><b v-if="match.result === 'teamB'">GANADOR ✳</b></div><strong>{{ playerNamesFor(match.teamB) }}</strong></div></div>
               <div v-if="match.status === 'scheduled'" class="match-controls"><button type="button" @click="startMatch(match)">▶ MARCAR EN JUEGO</button></div>
               <div v-else-if="match.status === 'inProgress'" class="match-controls"><button type="button" class="interrupt-button" @click="interruptMatch(match)">MARCAR INTERRUMPIDO</button></div>
-              <div v-if="match.status !== 'interrupted'" class="result-actions"><button type="button" :class="{ picked: match.result === 'teamA' }" :aria-pressed="match.result === 'teamA'" @click="setResult(match, 'teamA')"><span>3</span> GANA A</button><button type="button" :class="{ picked: match.result === 'draw' }" :aria-pressed="match.result === 'draw'" @click="setResult(match, 'draw')"><span>2</span> EMPATE</button><button type="button" :class="{ picked: match.result === 'teamB' }" :aria-pressed="match.result === 'teamB'" @click="setResult(match, 'teamB')"><span>3</span> GANA B</button></div>
+              <div v-else class="match-controls"><button type="button" class="reopen-button" @click="resetMatch(match)">{{ match.status === 'interrupted' ? '↻ REINTENTAR PARTIDO' : '↻ REABRIR PARTIDO' }}</button></div>
+               <div v-if="match.status !== 'interrupted'" class="result-actions"><button type="button" :class="{ picked: match.result === 'teamA' }" :aria-pressed="match.result === 'teamA'" @click="setResult(match, 'teamA')"><span>3</span> GANA A</button><button type="button" :class="{ picked: match.result === 'draw' }" :aria-pressed="match.result === 'draw'" @click="setResult(match, 'draw')"><span>2</span> EMPATE</button><button type="button" :class="{ picked: match.result === 'teamB' }" :aria-pressed="match.result === 'teamB'" @click="setResult(match, 'teamB')"><span>3</span> GANA B</button></div>
               <div class="match-status" :class="{ recorded: match.status === 'completed', interrupted: match.status === 'interrupted', playing: match.status === 'inProgress' }"><span>{{ match.status === 'completed' ? '✓' : match.status === 'interrupted' ? '!' : match.status === 'inProgress' ? '●' : '○' }}</span> {{ matchStatusText(match) }}</div>
             </article>
           </div>
@@ -729,4 +742,5 @@ function resetTournament() {
 .tutorial-card .tutorial-copy>p{margin:0 0 14px;color:#727a72;font-size:12px;line-height:1.7}
 @media(max-width:560px){.modal-card.tutorial-card{padding:24px 20px 18px}.tutorial-card h2{font-size:25px}.tutorial-card .tutorial-copy>p{font-size:11px}}
 @media(max-width:719px){.tutorial-card .tutorial-actions{position:sticky;bottom:0;padding:8px 0;background:#fffefa}}
+.match-controls .reopen-button{color:#667b67;text-decoration:underline;text-underline-offset:2px}
 </style>

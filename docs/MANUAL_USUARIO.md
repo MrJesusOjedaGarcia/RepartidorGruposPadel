@@ -31,6 +31,8 @@ La versión de la aplicación aparece en la barra superior.
 
 Abre **Las jornadas** y elige una jornada. Cada tarjeta muestra la pista y los dos equipos. Pulsa **Marcar en juego** cuando empiece el partido. Al terminar, marca **Gana A**, **Empate** o **Gana B**. Puedes seleccionar otro resultado si necesitas corregirlo. Un resultado ya anotado no se elimina al volver a pulsar el mismo botón.
 
+Si un partido quedó cerrado por error o fue posible reanudar uno interrumpido, pulsa **Reabrir partido** o **Reintentar partido** en su tarjeta. Confirma la acción: el partido vuelve a pendiente, mantiene los equipos y la pista, y pierde el resultado/puntos anteriores. Después puedes iniciarlo otra vez, registrar el resultado correcto o marcarlo interrumpido de nuevo.
+
 La aplicación suma automáticamente los puntos de todos los integrantes de cada equipo: **3** por ganar, **2** por empatar y **1** por perder. Los resultados y la jornada seleccionada se conservan al cerrar la aplicación.
 
 ## 3. Consultar y compartir la clasificación

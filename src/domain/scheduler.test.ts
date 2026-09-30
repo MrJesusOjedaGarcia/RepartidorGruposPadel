@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   generateSchedule,
   isAvailableAtRound,
+  reopenMatch,
   recalculateSchedule,
   withAvailabilityChange,
   type Match,
@@ -71,6 +72,57 @@ describe('availability timeline', () => {
 })
 
 describe('schedule generation and recalculation', () => {
+  it('reopens completed and interrupted matches as pending without changing their assignments', () => {
+    const completed: Match = {
+      id: 'completed-match',
+      court: 2,
+      teamA: ['p1', 'p2'],
+      teamB: ['p3', 'p4'],
+      result: 'teamA',
+      status: 'completed'
+    }
+    const interrupted: Match = { ...completed, id: 'interrupted-match', result: null, status: 'interrupted' }
+
+    expect(reopenMatch(completed)).toMatchObject({
+      id: completed.id,
+      court: completed.court,
+      teamA: completed.teamA,
+      teamB: completed.teamB,
+      result: null,
+      status: 'scheduled'
+    })
+    expect(reopenMatch(interrupted)).toMatchObject({
+      id: interrupted.id,
+      court: interrupted.court,
+      teamA: interrupted.teamA,
+      teamB: interrupted.teamB,
+      result: null,
+      status: 'scheduled'
+    })
+    expect(reopenMatch({ ...completed, status: 'scheduled', result: null })).toMatchObject({ status: 'scheduled', result: null })
+    expect(completed).toMatchObject({ status: 'completed', result: 'teamA' })
+    const players = makePlayers(4)
+    const before = calculateStandings(players, [{ id: 'round-1', matches: [completed] }])
+    const after = calculateStandings(players, [{ id: 'round-1', matches: [reopenMatch(completed)] }])
+    expect(before.find((row) => row.player.id === 'p1')).toMatchObject({ points: 3, played: 1 })
+    expect(after.find((row) => row.player.id === 'p1')).toMatchObject({ points: 0, played: 0 })
+  })
+
+  it('allows players from a reopened interrupted match to be scheduled again in that round', () => {
+    const players = makePlayers(8)
+    const originalRounds = generateSchedule(players, 3, 2, 'doubles').rounds
+    const reopened = reopenMatch({ ...originalRounds[0].matches[0], status: 'interrupted', result: null })
+    originalRounds[0].matches[0] = reopened
+
+    const result = recalculateSchedule(players, 3, 2, 'doubles', originalRounds, 0)
+    const firstRoundMatches = result.rounds[0].matches
+    const playingIds = firstRoundMatches.flatMap((match) => [...match.teamA, ...match.teamB])
+
+    expect(firstRoundMatches).toHaveLength(2)
+    expect(firstRoundMatches.every((match) => match.status === 'scheduled')).toBe(true)
+    expect(new Set(playingIds).size).toBe(players.length)
+  })
+
   it('covers every possible doubles partnership when five players have enough rounds for full coverage', () => {
     const players = makePlayers(5)
     for (const seed of [1, 7, 42, 2026, 65537]) {

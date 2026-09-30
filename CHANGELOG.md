@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## [1.2.1] - 2026-09-30
+
+### Añadido
+
+- Acción para reabrir partidos completados o interrumpidos, volverlos a pendiente y corregir su resultado o reanudarlos.
+- Confirmación al reabrir un partido para advertir que su resultado y puntos se borrarán.
+
 ## [1.2.0] - 2026-09-30
 
 ### Añadido

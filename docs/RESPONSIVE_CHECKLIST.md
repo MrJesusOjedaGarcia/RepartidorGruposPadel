@@ -14,7 +14,7 @@
 ## Recorrido por cada tamaño
 
 - [ ] **Grupo:** añadir un jugador, marcar cabeza antes del torneo, revisar el selector «Disponible desde» y la fila de disponibilidad.
-- [ ] **Jornadas:** desplazar el selector; leer nombres largos; pulsar «Marcar en juego», marcar resultado e interrumpir un partido.
+- [ ] **Jornadas:** desplazar el selector; leer nombres largos; pulsar «Marcar en juego», marcar resultado, interrumpir y reabrir un partido.
 - [ ] **Clasificación:** verificar posición, nombre, PJ, G, E, P y PTS. En teléfono debe leerse como tarjetas, no depender de scroll horizontal.
 - [ ] **Lesión/alta:** abrir selector de fecha y estado; abrir teclado; desplazar el diálogo y alcanzar cancelar/preparar.
 - [ ] **Vista previa:** revisar cargas y botones con el teclado cerrado/abierto, rotar el dispositivo y cancelar/confirmar.

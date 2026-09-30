@@ -95,12 +95,12 @@ El checklist es una guía de verificación manual en Safari iOS y Chrome Android
 
 Cada `Player` puede incluir `availabilityChanges: [{ fromRound, available, reason }]`. Este historial permite altas, bajas por lesión y reincorporaciones con fecha efectiva, sin borrar el historial del participante. Las jornadas anteriores al cambio conservan sus participantes, partidos y resultados.
 
-Cada `Match` distingue `scheduled`, `inProgress`, `completed` e `interrupted`. Solo los partidos `completed` con resultado computan para puntos y clasificación. Un partido interrumpido permanece visible como incidencia, no puntúa y bloquea a sus participantes para el resto de esa jornada. La persona lesionada deja de ser elegible para los partidos pendientes desde la jornada efectiva.
+Cada `Match` distingue `scheduled`, `inProgress`, `completed` e `interrupted`. Solo los partidos `completed` con resultado computan para puntos y clasificación. Un partido interrumpido permanece visible como incidencia, no puntúa y bloquea a sus participantes para el resto de esa jornada. La acción `reopenMatch` permite pasar `completed` o `interrupted` de nuevo a `scheduled`, borra el resultado y conserva los equipos/pista; así vuelven a participar de manera normal y pueden jugarse o corregirse. La persona lesionada deja de ser elegible para los partidos pendientes desde la jornada efectiva.
 
 ### Ámbito y proceso del recálculo
 
 1. Si la jornada actual está abierta, recalcular sus partidos `scheduled` (no iniciados) y los de las jornadas futuras. Si ya está cerrada, empezar por la siguiente jornada abierta.
-2. Mantener sin cambios los partidos `completed`, sus alineaciones, resultados y puntos. Mantener también los `interrupted` y bloquear sus jugadores durante esa jornada. Antes de solicitar el recálculo, terminar un partido `inProgress` o registrarlo como `interrupted`.
+2. Mantener sin cambios los partidos `completed`, sus alineaciones, resultados y puntos durante el recálculo. Mantener también los `interrupted` y bloquear sus jugadores durante esa jornada. Si el usuario reabre expresamente uno, pasa a pendiente, deja de puntuar y puede redistribuirse en el siguiente recálculo. Antes de solicitar el recálculo, terminar un partido `inProgress` o registrarlo como `interrupted`.
 3. Excluir de cada jornada a las personas no disponibles en esa fecha e incluir a las nuevas desde su fecha de alta. Nadie que haya jugado o tenga un partido en curso/interrumpido podrá recibir otra asignación en la misma jornada.
 4. Presentar una vista previa con los partidos completos que se conservan y los partidos pendientes que cambian. Aplicar la nueva planificación solo tras confirmación; cancelar no modifica el calendario vigente.
 
@@ -114,5 +114,5 @@ No se impone un descanso mínimo entre jornadas: jugar jornadas consecutivas o t
 
 - Los datos nuevos se guardan en `repartidor-padel-v2`. Al iniciar, los torneos de `v1` se migran: los participantes existentes están disponibles en todas las jornadas y el estado se infiere (`resultado` → `completed`; sin resultado → `scheduled`). Se conservan nombres, jornadas, resultados y puntos.
 - Se guarda el motivo y la jornada efectiva del cambio de disponibilidad. Los datos siguen locales; no se requiere sincronización con un servidor.
-- Las pruebas de `src/domain/scheduler.test.ts` cubren disponibilidad efectiva, altas, bajas, equilibrio, resultados preservados, interrupciones, cabezas de pista, unicidad de asignaciones y puntuación. Las vistas muestran una previsualización antes de confirmar; cancelar no aplica el recálculo ni la modificación de participantes.
+- Las pruebas de `src/domain/scheduler.test.ts` cubren disponibilidad efectiva, altas, bajas, equilibrio, resultados preservados, reapertura de partidos, interrupciones, cabezas de pista, unicidad de asignaciones y puntuación. Las vistas muestran una previsualización antes de confirmar; cancelar no aplica el recálculo ni la modificación de participantes.
 - Si la disponibilidad no permite completar todas las pistas, dejar las pistas necesarias libres y explicar el motivo en la vista previa y en la jornada.

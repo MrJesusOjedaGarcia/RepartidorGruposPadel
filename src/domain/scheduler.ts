@@ -68,6 +68,11 @@ export function withAvailabilityChange(player: Player, change: AvailabilityChang
   return { ...player, availabilityChanges: changes.sort((a, b) => a.fromRound - b.fromRound) }
 }
 
+export function reopenMatch(match: Match): Match {
+  if (match.status !== 'completed' && match.status !== 'interrupted') return match
+  return { ...match, status: 'scheduled', result: null }
+}
+
 interface PartnerEdge {
   players: [string, string]
   repeated: boolean
