@@ -37,6 +37,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 19. Ofrecer un tutorial inicial breve, dividido en pasos, que explique configuración, generación de jornadas, resultados/clasificación y cambios de disponibilidad. Debe mostrarse en la primera visita, poder recorrerse o cerrarse, recordar que ya se completó en el dispositivo y poder reabrirse en cualquier momento desde un botón de ayuda.
 20. Permitir reabrir un partido completado o interrumpido. La acción requiere confirmación, devuelve el partido a pendiente, limpia el resultado/puntos anteriores si los había y conserva jornada, pista y equipos para volver a jugarlo o registrar el estado correcto.
 21. Resaltar visualmente los nombres de jugadores líderes en las tarjetas de cada jornada y usar «jugador líder» en las etiquetas y ayudas visibles de la aplicación.
+22. Permitir eliminar todos los jugadores con una sola acción confirmada. Si ya existe un torneo, borrar también sus jornadas y resultados para no conservar partidos sin participantes.
 
 ## Reglas de integridad del torneo
 
@@ -87,6 +88,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 12. Con 12 participantes, 4 jugadores líderes y 2 pistas, se ocupan ambas pistas en cada jornada si hay cruces válidos; cada partido mantiene igual número de líderes en ambos equipos y ningún participante que no sea líder juega jornadas consecutivas si existe una rotación con la misma capacidad.
 13. El selector permite habilitar partidos sin líderes o exigir líderes en todos los partidos. Con la opción estricta, solo se genera un partido cuando puede asignarse un líder a cada equipo.
 14. Los nombres de los jugadores líderes aparecen resaltados en las tarjetas de las jornadas y se indica su rol con texto accesible; la interfaz utiliza el término «jugador líder».
+15. El botón de eliminación masiva pide confirmación. Sin torneo, limpia la lista; con un torneo, limpia también jornadas, partidos y resultados, y vuelve a la configuración.
 
 ## Versionado de la aplicación
 
@@ -101,3 +103,4 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - Ayuda: tutorial interactivo de bienvenida, accesible y recordado en el dispositivo.
 - Partidos: posibilidad de reabrir un resultado o interrupción y volver a jugar/corregir el partido.
 - Reparto: política configurable de jugadores líderes, máxima ocupación viable de pistas y rotación preferente de descansos.
+- Grupo: opción de eliminar todos los jugadores de una vez, confirmando el borrado del torneo si lo hay.

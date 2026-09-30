@@ -26,6 +26,8 @@ La primera vez que abras la aplicación aparecerá una guía rápida de cuatro p
 
 La regla de jugadores líderes se guarda en el dispositivo y queda fijada al crear las jornadas. Para cambiarla después, reinicia las jornadas del torneo desde `↻`.
 
+Para vaciar la lista, pulsa **Eliminar todos los jugadores** debajo de los nombres y confirma. Si ya hay jornadas, también se borrarán los partidos y resultados del torneo.
+
 El reparto prioriza llenar todas las pistas que admitan partidos compatibles y rota los descansos para evitar que una persona juegue dos jornadas seguidas si puede mantener la misma cantidad de partidos. Los jugadores líderes pueden participar con más frecuencia si hace falta para equilibrar los equipos. Cada persona juega como máximo una vez por jornada.
 
 En dobles, el reparto busca parejas de compañeros nuevas y cruces con personas que aún no se han enfrentado. Solo repite compañeros cuando ya no encuentra ningún partido compatible con parejas inéditas; entonces usa la combinación con menos repeticiones. En individual, ningún duelo se repite. Si la disponibilidad, la regla elegida para los jugadores líderes o los cruces posibles no permiten ocupar una pista, queda libre.

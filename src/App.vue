@@ -319,6 +319,25 @@ function removePlayer(id: string) {
   players.value = players.value.filter((player) => player.id !== id)
 }
 
+function removeAllPlayers() {
+  if (!players.value.length) return
+  const target = players.value.length === 1 ? 'al único jugador' : 'a todos los jugadores'
+  const confirmation = rounds.value.length
+    ? `¿Quieres eliminar ${target} del grupo? También se borrarán todas las jornadas y resultados. Esta acción no se puede deshacer.`
+    : `¿Quieres eliminar ${target} del grupo?`
+  if (!window.confirm(confirmation)) return
+
+  players.value = []
+  rounds.value = []
+  activeRoundIndex.value = 0
+  activeView.value = 'setup'
+  newPlayerName.value = ''
+  joiningRound.value = 1
+  availabilityDialog.value = null
+  recalculationProposal.value = null
+  notice.value = 'Se eliminó el grupo de jugadores.'
+}
+
 function generate() {
   const safeRoundCount = Math.max(1, Math.min(60, Math.floor(Number(roundCount.value) || 1)))
   const safeCourtCount = Math.max(1, Math.min(12, Math.floor(Number(courtCount.value) || 1)))
@@ -621,6 +640,7 @@ function resetTournament() {
               </div>
             </div>
             <div v-else class="empty-players"><span>＋</span><p>Tu lista empieza con un nombre.<br /><small>Los jugadores líderes se reparten entre ambos equipos.</small></p></div>
+            <button v-if="players.length" type="button" class="clear-players-button" aria-label="Eliminar todos los jugadores" @click="removeAllPlayers">× ELIMINAR TODOS LOS JUGADORES</button>
             <div class="panel-footnote"><span class="footnote-star">✳</span><span>Marca a los jugadores líderes. En 2 × 2 habrá uno en cada equipo.</span></div>
           </article>
 
@@ -778,4 +798,6 @@ function resetTournament() {
 .team-player-name.leader-player{color:#b85f42;font-weight:800;text-decoration:underline;text-decoration-color:#e2b4a2;text-decoration-thickness:1px;text-underline-offset:2px}
 .leader-player-mark{color:#dd7959;font-size:.8em}
 .team-player-separator{color:#92998d}
+.clear-players-button{display:flex;width:100%;min-height:44px;align-items:center;justify-content:center;gap:6px;margin:8px 0 0;padding:8px 12px;border:1px solid #e8d7cf;background:#fffaf6;color:#ad654a;font:8px var(--mono);letter-spacing:.5px;cursor:pointer}
+.clear-players-button:hover{background:#f8eee8}
 </style>

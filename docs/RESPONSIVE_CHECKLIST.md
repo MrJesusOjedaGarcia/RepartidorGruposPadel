@@ -13,7 +13,7 @@
 
 ## Recorrido por cada tamaño
 
-- [ ] **Grupo:** añadir un jugador, marcar jugador líder antes del torneo, revisar el selector «Disponible desde» y desplegar la política de jugadores líderes en móvil/tablet.
+- [ ] **Grupo:** añadir un jugador, marcar jugador líder antes del torneo, revisar el selector «Disponible desde», desplegar la política de jugadores líderes y probar «Eliminar todos» en móvil/tablet.
 - [ ] **Jornadas:** desplazar el selector; leer nombres largos; pulsar «Marcar en juego», marcar resultado, interrumpir y reabrir un partido.
 - [ ] **Clasificación:** verificar posición, nombre, PJ, G, E, P y PTS. En teléfono debe leerse como tarjetas, no depender de scroll horizontal.
 - [ ] **Lesión/alta:** abrir selector de fecha y estado; abrir teclado; desplazar el diálogo y alcanzar cancelar/preparar.

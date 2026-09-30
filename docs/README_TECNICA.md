@@ -7,6 +7,7 @@ PWA de una sola página para organizar partidos de pádel, generar jornadas, reg
 ## Tecnologías y estructura
 
 - **Vue 3 + Composition API:** estado y vistas reactivas en `src/App.vue`.
+- **Gestión del grupo:** la acción masiva borra la plantilla y, si hay jornadas, también el torneo completo tras confirmación.
 - **TypeScript:** tipos de jugadores, partidos, jornadas, formato y política de jugadores líderes en `src/domain/scheduler.ts`.
 - **Vite:** servidor de desarrollo y compilación estática.
 - **vite-plugin-pwa / Workbox:** manifiesto y service worker para instalación y acceso sin conexión después de la primera carga.

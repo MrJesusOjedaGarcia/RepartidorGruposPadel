@@ -1,5 +1,11 @@
 # Registro de cambios
 
+## [1.3.2] - 2026-09-30
+
+### Añadido
+
+- Acción para eliminar todos los jugadores de una vez, con confirmación; si existe un torneo, borra también sus jornadas y resultados.
+
 ## [1.3.1] - 2026-09-30
 
 ### Cambiado
