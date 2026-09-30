@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## [1.3.7] - 2026-09-30
+
+### Mejorado
+
+- Se rotan las parejas compatibles y se distribuye su frecuencia; un ajuste final intercambia jugadores del mismo rol sin cambiar la asistencia ni las reglas de líderes.
+- Se prioriza que todos los jugadores se enfrenten al menos una vez y que cada líder se empareje con todos los no líderes cuando el calendario lo permite.
+
 ## [1.3.6] - 2026-09-30
 
 ### Corregido

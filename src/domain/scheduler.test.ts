@@ -158,16 +158,42 @@ describe('schedule generation and recalculation', () => {
     for (const seed of [13, 404, 2026]) {
       const result = withRandomSeed(seed, () => generateSchedule(players, 16, 2, 'doubles', 'optional'))
       const appearances = new Map(players.map((player) => [player.id, 0]))
+      const partnerCounts = new Map<string, number>()
+      const encounterCounts = new Map<string, number>()
       expect(result.rounds).toHaveLength(16)
       expect(result.rounds.every((round) => round.matches.length === 2)).toBe(true)
       for (const match of result.rounds.flatMap((round) => round.matches)) {
-        for (const id of [...match.teamA, ...match.teamB]) appearances.set(id, (appearances.get(id) ?? 0) + 1)
+        const playing = [...match.teamA, ...match.teamB]
+        for (const id of playing) appearances.set(id, (appearances.get(id) ?? 0) + 1)
+        for (const team of [match.teamA, match.teamB]) {
+          const key = [...team].sort().join('::')
+          partnerCounts.set(key, (partnerCounts.get(key) ?? 0) + 1)
+        }
+        for (let first = 0; first < playing.length; first += 1) {
+          for (let second = first + 1; second < playing.length; second += 1) {
+            const key = [playing[first], playing[second]].sort().join('::')
+            encounterCounts.set(key, (encounterCounts.get(key) ?? 0) + 1)
+          }
+        }
       }
       const counts = Object.fromEntries(appearances)
       const leaderAverage = players.filter((player) => player.isCaptain).reduce((total, player) => total + appearances.get(player.id)!, 0) / 4
       const otherAverage = players.filter((player) => !player.isCaptain).reduce((total, player) => total + appearances.get(player.id)!, 0) / 8
       expect(Math.max(...appearances.values()) - Math.min(...appearances.values()), JSON.stringify(counts)).toBeLessThanOrEqual(1)
       expect(Math.abs(leaderAverage - otherAverage), JSON.stringify(counts)).toBeLessThanOrEqual(0.5)
+      expect(Math.max(...partnerCounts.values()), JSON.stringify([...partnerCounts.entries()].filter(([, count]) => count > 1))).toBeLessThanOrEqual(3)
+      for (const leader of players.filter((player) => player.isCaptain)) {
+        const partners = new Set(result.rounds.flatMap((round) => round.matches.flatMap((match) => [match.teamA, match.teamB])
+          .filter((team) => team.includes(leader.id))
+          .flatMap((team) => team.filter((id) => id !== leader.id))))
+        expect(partners.size, `${leader.id}: ${[...partners].sort().join(', ')}`).toBe(8)
+      }
+      for (let first = 0; first < players.length; first += 1) {
+        for (let second = first + 1; second < players.length; second += 1) {
+          const key = [players[first].id, players[second].id].sort().join('::')
+          expect(encounterCounts.has(key), key).toBe(true)
+        }
+      }
     }
   })
 
