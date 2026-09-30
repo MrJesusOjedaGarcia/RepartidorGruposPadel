@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## [1.2.0] - 2026-09-30
+
+### Añadido
+
+- Tutorial guiado de cuatro pasos que aparece la primera vez y puede volver a abrirse desde el botón de ayuda.
+- Navegación por teclado, progreso accesible, cierre con Escape y preferencia de tutorial completado guardada localmente.
+
 ## [1.1.0] - 2026-09-30
 
 ### Cambiado

@@ -32,6 +32,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 14. Repartir las participaciones pendientes de modo que se intente reducir la diferencia entre el total de partidos jugados y previstos por cada participante disponible. El equilibrio de partidos tiene prioridad frente a repartir descansos entre jornadas; se permite que una persona juegue en todas las jornadas consecutivas necesarias. No se permite duplicar asignaciones simultáneas ni jugar dos partidos en una misma jornada.
 15. Si una persona se lesiona durante un partido, permitir marcar ese partido como interrumpido antes del recálculo. El partido interrumpido se conserva en el historial como incidencia, no concede puntos y sus participantes no vuelven a jugar esa jornada. Los demás partidos completados no se modifican.
 16. Informar cuando una jornada o pista quede libre por falta de cruces compatibles, disponibilidad, jugadores suficientes o límites de pistas.
+17. Ofrecer un tutorial inicial breve, dividido en pasos, que explique configuración, generación de jornadas, resultados/clasificación y cambios de disponibilidad. Debe mostrarse en la primera visita, poder recorrerse o cerrarse, recordar que ya se completó en el dispositivo y poder reabrirse en cualquier momento desde un botón de ayuda.
 
 ## Reglas de integridad del torneo
 
@@ -44,6 +45,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - Las parejas de compañeros se mantienen inéditas mientras exista una combinación compatible; solo se repiten cuando ya no puede formarse otro partido con parejas nuevas, y entonces se minimiza el número de repeticiones.
 - Los partidos interrumpidos quedan diferenciados de los pendientes y los completados; no suman puntos.
 - La clasificación considera resultados completados. Los participantes con cambios de estado permanecen en la tabla y mantienen sus puntos históricos.
+- El tutorial no modifica ni borra datos del torneo y la preferencia de haberlo completado se guarda localmente, sin cuenta ni servicio remoto.
 
 ## Requisitos de adaptabilidad móvil y tablet
 
@@ -73,6 +75,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 7. Se pueden marcar tres o más cabezas de pista en el grupo. Cada partido 2 × 2 generado tiene como máximo una cabeza en cada equipo; si no hay un cuarteto/separación válida, la pista queda libre en vez de crear un equipo con dos cabezas.
 8. Con 5 participantes disponibles, una pista y 5 jornadas, el reparto puede usar las 10 parejas posibles una sola vez. Cuando ya no queden parejas inéditas compatibles, se prioriza llenar las pistas con el mínimo de repeticiones.
 9. La versión SemVer mostrada en la aplicación coincide con `package.json` y el lockfile; cada versión publicada queda anotada en `CHANGELOG.md` y etiquetada en Git.
+10. En la primera visita aparece un tutorial corto con anterior/siguiente y omitir/cerrar; se puede reabrir desde Ayuda y funciona con teclado y pantalla táctil en móvil, tablet y escritorio.
 
 ## Versionado de la aplicación
 
@@ -84,3 +87,4 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - Versión inicial: configuración del grupo, generación de jornadas, resultados, puntos y exportación.
 - Ampliación: altas, bajas por lesión, partidos interrumpidos y recálculo con equilibrio de participaciones durante el torneo.
 - Reparto: optimización de parejas inéditas y cobertura de cruces; versionado SemVer visible en la PWA con changelog y etiquetas Git.
+- Ayuda: tutorial interactivo de bienvenida, accesible y recordado en el dispositivo.

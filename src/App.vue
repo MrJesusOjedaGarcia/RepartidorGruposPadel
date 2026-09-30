@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   generateSchedule,
   isAvailableAtRound,
@@ -37,6 +37,7 @@ interface AvailabilityDialog {
 }
 
 const STORAGE_KEY = 'repartidor-padel-v2'
+const TUTORIAL_STORAGE_KEY = 'repartidor-padel-tutorial-v1'
 const appVersion = packageMetadata.version
 const publicBase = import.meta.env.BASE_URL
 const LEGACY_STORAGE_KEY = 'repartidor-padel-v1'
@@ -54,6 +55,40 @@ const availabilityDialog = ref<AvailabilityDialog | null>(null)
 const availabilityEffectiveRound = ref(1)
 const availabilityTarget = ref<'available' | 'unavailable'>('unavailable')
 const recalculationProposal = ref<RecalculationProposal | null>(null)
+const tutorialOpen = ref(false)
+const tutorialStep = ref(0)
+const tutorialTrigger = ref<HTMLButtonElement | null>(null)
+const tutorialCloseButton = ref<HTMLButtonElement | null>(null)
+const tutorialSteps = [
+  {
+    icon: '＋',
+    eyebrow: 'PRIMERO, EL GRUPO',
+    title: 'Prepara quién juega.',
+    description: 'Añade a las personas, elige dobles o individual y ajusta cuántas jornadas y pistas vais a usar.',
+    tip: 'Puedes señalar todas las cabezas de pista que necesites; en dobles siempre irán en equipos distintos.'
+  },
+  {
+    icon: '↗',
+    eyebrow: 'DESPUÉS, A REPARTIR',
+    title: 'Genera las jornadas.',
+    description: 'Pulsa «Generar jornadas» y la aplicación organizará los partidos y las pistas disponibles.',
+    tip: 'Busca compañeros nuevos y cruces variados; solo repite pareja cuando no queda una combinación compatible.'
+  },
+  {
+    icon: '3',
+    eyebrow: 'AL TERMINAR CADA PARTIDO',
+    title: 'Anota el resultado.',
+    description: 'Abre «Las jornadas», elige la jornada y marca si gana el equipo A, hay empate o gana el equipo B.',
+    tip: 'Cada participante suma 3 puntos por ganar, 2 por empatar y 1 por perder. La clasificación se actualiza sola.'
+  },
+  {
+    icon: '↻',
+    eyebrow: 'SI EL GRUPO CAMBIA',
+    title: 'Recalcula lo pendiente.',
+    description: 'Si alguien se lesiona o se incorpora alguien nuevo, indica desde qué jornada cambia la disponibilidad y revisa la propuesta.',
+    tip: 'Los resultados finalizados se conservan. Tus datos se guardan solo en este dispositivo.'
+  }
+]
 let removeViewportListeners = () => {}
 
 function syncVisualViewportHeight() {
@@ -157,6 +192,11 @@ onMounted(() => {
     localStorage.removeItem(LEGACY_STORAGE_KEY)
   } finally {
     storageReady.value = true
+    try {
+      if (localStorage.getItem(TUTORIAL_STORAGE_KEY) !== 'completed') tutorialOpen.value = true
+    } catch {
+      tutorialOpen.value = true
+    }
   }
 })
 
@@ -173,6 +213,58 @@ watch([players, rounds, roundCount, courtCount, mode], () => {
     mode: mode.value
   } satisfies StoredApp))
 }, { deep: true })
+
+watch(tutorialOpen, async (isOpen) => {
+  if (!isOpen) return
+  await nextTick()
+  tutorialCloseButton.value?.focus()
+})
+
+const currentTutorialStep = computed(() => tutorialSteps[tutorialStep.value])
+
+function openTutorial() {
+  tutorialStep.value = 0
+  tutorialOpen.value = true
+}
+
+function closeTutorial() {
+  tutorialOpen.value = false
+  try {
+    localStorage.setItem(TUTORIAL_STORAGE_KEY, 'completed')
+  } catch {
+    // The tutorial remains available from the help button if storage is unavailable.
+  }
+  nextTick(() => tutorialTrigger.value?.focus())
+}
+
+function advanceTutorial() {
+  if (tutorialStep.value === tutorialSteps.length - 1) {
+    closeTutorial()
+    return
+  }
+  tutorialStep.value += 1
+}
+
+function handleTutorialKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    closeTutorial()
+    return
+  }
+  if (event.key !== 'Tab') return
+
+  const dialog = event.currentTarget as HTMLElement
+  const focusable = [...dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')]
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last?.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first?.focus()
+  }
+}
 
 watch(firstEditableRound, (round) => {
   if (joiningRound.value < round) joiningRound.value = Math.min(round, maxEditableRound.value)
@@ -440,6 +532,7 @@ function resetTournament() {
       <div class="topbar-right">
         <span class="offline-tag"><span></span> GUARDADO EN ESTE DISPOSITIVO</span>
         <span class="version-tag" :aria-label="`Versión ${appVersion}`">v{{ appVersion }}</span>
+        <button ref="tutorialTrigger" class="icon-button tutorial-trigger" type="button" aria-label="Abrir tutorial de uso" title="Tutorial y ayuda" @click="openTutorial">?</button>
         <button v-if="rounds.length" class="icon-button" type="button" aria-label="Reiniciar torneo" title="Borrar jornadas y resultados" @click="resetTournament">↻</button>
       </div>
     </header>
@@ -543,6 +636,29 @@ function resetTournament() {
       </section>
     </main>
 
+    <div v-if="tutorialOpen" class="modal-backdrop tutorial-backdrop" @click.self="closeTutorial">
+      <section class="modal-card tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorial-title" aria-describedby="tutorial-description" @keydown="handleTutorialKeydown">
+        <button ref="tutorialCloseButton" type="button" class="modal-close" aria-label="Cerrar tutorial" @click="closeTutorial">×</button>
+        <div class="tutorial-progress-head"><span>GUÍA RÁPIDA</span><span>PASO {{ (tutorialStep + 1).toString().padStart(2, '0') }} / {{ tutorialSteps.length.toString().padStart(2, '0') }}</span></div>
+        <div class="tutorial-progress-track" role="progressbar" :aria-valuenow="tutorialStep + 1" :aria-valuemin="1" :aria-valuemax="tutorialSteps.length" :aria-label="`Paso ${tutorialStep + 1} de ${tutorialSteps.length}`"><span :style="{ width: `${((tutorialStep + 1) / tutorialSteps.length) * 100}%` }"></span></div>
+        <div class="tutorial-illustration" aria-hidden="true"><span>{{ currentTutorialStep.icon }}</span><small>{{ (tutorialStep + 1).toString().padStart(2, '0') }}</small></div>
+        <div class="tutorial-copy" aria-live="polite">
+          <span class="section-kicker">{{ currentTutorialStep.eyebrow }}</span>
+          <h2 id="tutorial-title">{{ currentTutorialStep.title }}</h2>
+          <p id="tutorial-description">{{ currentTutorialStep.description }}</p>
+          <div class="tutorial-tip"><span>✳</span><p>{{ currentTutorialStep.tip }}</p></div>
+        </div>
+        <div class="tutorial-dots" role="group" aria-label="Pasos del tutorial">
+          <button v-for="(_, index) in tutorialSteps" :key="index" type="button" :class="{ active: tutorialStep === index }" :aria-label="`Ir al paso ${index + 1}`" :aria-current="tutorialStep === index ? 'step' : undefined" @click="tutorialStep = index"></button>
+        </div>
+        <div class="tutorial-actions">
+          <button type="button" class="text-link" :disabled="tutorialStep === 0" @click="tutorialStep = Math.max(0, tutorialStep - 1)">← ANTERIOR</button>
+          <button type="button" class="primary-small" @click="advanceTutorial">{{ tutorialStep === tutorialSteps.length - 1 ? 'EMPEZAR ↗' : 'SIGUIENTE →' }}</button>
+        </div>
+        <button type="button" class="tutorial-skip" @click="closeTutorial">Omitir tutorial</button>
+      </section>
+    </div>
+
     <div v-if="availabilityDialog" class="modal-backdrop" @click.self="availabilityDialog = null">
       <section class="modal-card availability-modal" role="dialog" aria-modal="true" aria-labelledby="availability-title">
         <button type="button" class="modal-close" aria-label="Cerrar" @click="availabilityDialog = null">×</button>
@@ -578,12 +694,39 @@ function resetTournament() {
 
 <style scoped>
 .version-tag{border:1px solid #dfded6;border-radius:12px;padding:4px 7px;color:#737b70;font:8px var(--mono);white-space:nowrap}
+.tutorial-trigger{min-width:44px;min-height:44px;font-weight:700;color:#637267}
+.tutorial-backdrop{z-index:1100}
+.tutorial-card{width:min(100%,470px);padding:29px 34px 23px}
+.tutorial-progress-head{display:flex;justify-content:space-between;gap:12px;margin:1px 42px 8px 0;color:#80877e;font:8px var(--mono);letter-spacing:.65px}
+.tutorial-progress-track{height:4px;overflow:hidden;border-radius:4px;background:#e9e7df}
+.tutorial-progress-track span{display:block;height:100%;border-radius:inherit;background:#dd7959;transition:width .2s ease}
+.tutorial-illustration{position:relative;display:grid;place-items:center;width:82px;height:82px;margin:24px auto 20px;border:1px solid #e4e4d9;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fffefa,#e9eee3);color:#173d35}
+.tutorial-illustration>span{font:600 37px var(--serif)}
+.tutorial-illustration small{position:absolute;right:-3px;bottom:-2px;display:grid;place-items:center;width:25px;height:25px;border:2px solid #fffefa;border-radius:50%;background:#dd7959;color:white;font:8px var(--mono)}
+.tutorial-copy h2{margin:8px 36px 9px 0;font-size:30px}
+.tutorial-copy>p{margin:0 0 14px;color:#727a72;font-size:12px;line-height:1.7}
+.tutorial-tip{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-left:2px solid #dd7959;background:#f7f6ef;color:#586559}
+.tutorial-tip>span{color:#dd7959;font-size:14px}
+.tutorial-tip p{margin:0;font-size:10px;line-height:1.6}
+.tutorial-dots{display:flex;justify-content:center;gap:8px;margin:18px 0 15px}
+.tutorial-dots button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;background:transparent;cursor:pointer}
+.tutorial-dots button::before{width:8px;height:8px;border-radius:8px;background:#d7d8ce;content:'';transition:width .15s ease,background-color .15s ease}
+.tutorial-dots button.active::before{width:22px;background:#173d35}
+.tutorial-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid #eeede8}
+.tutorial-actions .text-link:disabled{opacity:.35;cursor:default}
+.tutorial-skip{display:block;min-height:44px;margin:4px auto 0;padding:8px 16px;border:0;background:transparent;color:#899087;font-size:10px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .court-note{margin:-5px 0 13px;color:#878d82;font-size:9px}
 .join-round-field{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-2px 0 9px;color:#81877f;font:8px var(--mono);letter-spacing:.45px}.join-round-field select,.modal-field select{min-width:145px;height:32px;padding:0 9px;border:1px solid #dfded6;background:#faf9f5;color:#173d35;font:10px 'DM Sans',sans-serif}.player-row{flex-wrap:wrap;padding:3px 0}.availability-pill{border-radius:12px;background:#edf0e8;padding:4px 7px;color:#647c58;font:7px var(--mono);white-space:nowrap}.availability-pill.unavailable{background:#f3e6df;color:#ad654a}.availability-action{border:1px solid #dfd4c8;background:#fffaf2;padding:5px 7px;color:#aa684d;font:7px var(--mono);white-space:nowrap;cursor:pointer}.captain-toggle:disabled{opacity:.45;cursor:not-allowed}.match-controls{display:flex;justify-content:flex-end;margin:-5px 0 8px}.match-controls button{border:0;background:transparent;padding:4px 0;color:#87917e;font:7px var(--mono);letter-spacing:.35px;cursor:pointer}.match-controls .interrupt-button{color:#b45e46}.match-status.interrupted{color:#ad654a}.match-status.playing{color:#b4854b}.match-card.interrupted{border-color:#e6c8b9;background:#fffaf7}.match-card.inprogress{border-color:#d3bd91;background:#fffcf5}.standing-player .standing-unavailable{padding:3px 6px;border-radius:9px;background:#f3e6df;color:#ad654a}.modal-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;overflow-y:auto;padding:24px;background:rgba(16,35,30,.62);backdrop-filter:blur(3px)}.modal-card{position:relative;width:min(100%,540px);max-height:calc(100vh - 48px);overflow-y:auto;border:1px solid #dfded6;border-radius:6px;background:#fffefa;padding:30px 32px;box-shadow:0 24px 80px rgba(0,0,0,.2)}.modal-card h2{margin:9px 35px 8px 0;color:#173d35;font:600 30px/1.1 var(--serif)}.modal-card>p{margin:0 0 17px;color:#727a72;font-size:11px;line-height:1.7}.modal-close{position:absolute;top:15px;right:17px;width:31px;height:31px;border:1px solid #e1dfd8;border-radius:50%;background:transparent;color:#667068;font-size:20px;cursor:pointer}.modal-field{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:13px 0;color:#858b83;font:8px var(--mono);letter-spacing:.55px}.modal-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:21px;padding-top:15px;border-top:1px solid #eeede8}.preview-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:17px 0}.preview-counts>div{display:flex;align-items:center;gap:9px;min-height:57px;padding:10px;border:1px solid #e8e5dc;background:#f8f7f2}.preview-counts strong{color:#173d35;font:23px var(--serif)}.preview-counts span{color:#858b83;font:7px/1.45 var(--mono)}.preview-note{margin:0 0 12px!important;color:#a05e44!important;font-size:9px!important}.preview-blocker{display:grid;gap:6px;margin:14px 0;padding:12px 14px;border-left:3px solid #c36d50;background:#f8ede7;color:#744638;font-size:10px;line-height:1.5}.preview-blocker strong{font-size:11px}.preview-blocker span:last-child{font-family:var(--mono);font-size:8px}.preview-load{margin-top:13px;border:1px solid #e7e5de;background:#fbfaf6}.preview-load h3{margin:0;padding:10px 12px;border-bottom:1px solid #e7e5de;color:#525f55;font:9px var(--mono);letter-spacing:.3px}.preview-load-row{display:flex;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #eeede8;color:#515c53;font-size:10px}.preview-load-row:last-child{border-bottom:0}.preview-load-row small{margin-left:5px;color:#b46f52;font:7px var(--mono)}.preview-load-row strong{color:#173d35;font:700 13px var(--serif)}.preview-footnote{margin:10px 0 0!important;color:#868c83!important;font-size:9px!important}.modal-actions .primary-small:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:560px){.version-tag{padding:3px 5px;font-size:7px}.player-row{column-gap:5px}.availability-pill{margin-left:auto}.player-name{min-width:90px}.captain-toggle{font-size:7px}.availability-action{font-size:7px}.modal-backdrop{align-items:end;padding:10px}.modal-card{max-height:calc(100vh - 20px);padding:25px 19px}.modal-card h2{font-size:25px}.preview-counts{gap:5px}.preview-counts>div{gap:5px;padding:7px}.preview-counts strong{font-size:19px}.preview-counts span{font-size:6px}.modal-actions .primary-small{font-size:7px;padding:0 8px}.modal-actions .text-link{font-size:7px}}
+@media(max-width:560px){.version-tag{padding:3px 5px;font-size:7px}.tutorial-card{padding:24px 20px 18px}.tutorial-illustration{width:70px;height:70px;margin:20px auto 17px}.tutorial-illustration>span{font-size:32px}.tutorial-copy h2{font-size:25px}.tutorial-copy>p{font-size:11px}.tutorial-tip p{font-size:9px}.tutorial-dots{margin:15px 0 12px}.tutorial-actions .text-link,.tutorial-actions .primary-small{font-size:8px;padding-right:10px;padding-left:10px}.player-row{column-gap:5px}.availability-pill{margin-left:auto}.player-name{min-width:90px}.captain-toggle{font-size:7px}.availability-action{font-size:7px}.modal-backdrop{align-items:end;padding:10px}.modal-card{max-height:calc(100vh - 20px);padding:25px 19px}.modal-card h2{font-size:25px}.preview-counts{gap:5px}.preview-counts>div{gap:5px;padding:7px}.preview-counts strong{font-size:19px}.preview-counts span{font-size:6px}.modal-actions .primary-small{font-size:7px;padding:0 8px}.modal-actions .text-link{font-size:7px}}
 .modal-backdrop{min-height:100vh;min-height:100dvh;padding-top:max(12px,env(safe-area-inset-top,0px));padding-right:max(12px,env(safe-area-inset-right,0px));padding-bottom:max(12px,env(safe-area-inset-bottom,0px));padding-left:max(12px,env(safe-area-inset-left,0px))}.modal-card{max-height:calc(var(--visual-viewport-height,100dvh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.modal-close{width:44px;height:44px}.join-round-field select,.modal-field select{min-height:44px}
 @media(max-width:719px){.modal-backdrop{padding-top:max(12px,env(safe-area-inset-top,0px));padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}.modal-card{max-height:calc(var(--visual-viewport-height,100dvh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 12px)}.modal-field select,.join-round-field select{width:min(65%,220px);min-width:0;height:44px;font-size:16px}.modal-actions{position:sticky;bottom:0;padding-bottom:max(8px,env(safe-area-inset-bottom,0px));background:#fffefa}}
 @media(max-width:420px){.modal-backdrop{align-items:end}.modal-card{width:100%;max-height:calc(var(--visual-viewport-height,100dvh) - env(safe-area-inset-top,0px) - 8px);padding:24px 15px calc(12px + env(safe-area-inset-bottom,0px));border-bottom-right-radius:0;border-bottom-left-radius:0}}
 @media(max-height:520px) and (max-width:800px){.modal-backdrop{align-items:center}.modal-card{max-height:calc(var(--visual-viewport-height,100dvh) - 16px);border-radius:6px}}
 @media(pointer:coarse){.modal-close{min-width:44px;min-height:44px}}
+.tutorial-backdrop{z-index:1100}
+.modal-card.tutorial-card{width:min(100%,470px);padding:29px 34px 23px}
+.tutorial-card h2{font-size:30px}
+.tutorial-card .tutorial-copy>p{margin:0 0 14px;color:#727a72;font-size:12px;line-height:1.7}
+@media(max-width:560px){.modal-card.tutorial-card{padding:24px 20px 18px}.tutorial-card h2{font-size:25px}.tutorial-card .tutorial-copy>p{font-size:11px}}
+@media(max-width:719px){.tutorial-card .tutorial-actions{position:sticky;bottom:0;padding:8px 0;background:#fffefa}}
 </style>

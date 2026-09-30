@@ -11,12 +11,13 @@ PWA de una sola página para organizar partidos de pádel, generar jornadas, reg
 - **Vite:** servidor de desarrollo y compilación estática.
 - **vite-plugin-pwa / Workbox:** manifiesto y service worker para instalación y acceso sin conexión después de la primera carga.
 - **Responsive móvil/tablet:** CSS por anchos/orientación, `viewport-fit=cover`, insets `safe-area-inset-*` y soporte de altura dinámica para Safari iOS/Chrome Android.
+- **Tutorial guiado:** cuatro pasos accesibles en `src/App.vue`, mostrado en primera visita, navegable con teclado/tacto y reabrible desde la cabecera; la preferencia se recuerda con una clave independiente en `localStorage`.
 - **Web Storage:** persistencia automática en `localStorage`, esquema `repartidor-padel-v2`, con migración desde `v1`.
 - **Canvas 2D:** creación de la imagen PNG de clasificación en el propio dispositivo.
 
 ```text
 src/
-├── App.vue                 # Vistas, estado, incidencias, puntuación y persistencia
+├── App.vue                 # Vistas, tutorial, incidencias, puntuación y persistencia
 ├── main.ts                 # Punto de entrada Vue
 ├── style.css               # Sistema visual base
 ├── responsive.css          # Variantes móvil/tablet, safe areas y teclado
@@ -53,6 +54,7 @@ El reparto crea varios calendarios candidatos para los grupos pequeños y conser
 - Empate: cada participante suma 2 puntos.
 - La clasificación se ordena por puntos, después por victorias y finalmente por nombre.
 - Los cambios de jugadores, disponibilidad, ajustes, jornadas, estados y resultados se guardan automáticamente en el almacenamiento local del navegador. No se envían a un servidor.
+- El tutorial usa `repartidor-padel-tutorial-v1` para recordar que se cerró; esta preferencia es independiente del torneo.
 
 ## Desarrollo y publicación
 

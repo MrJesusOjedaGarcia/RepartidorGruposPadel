@@ -4,6 +4,10 @@
 
 Abre la aplicación en el navegador. Añádela a la pantalla de inicio desde el menú del navegador si quieres usarla como aplicación. Una vez cargada, la PWA conserva los datos en ese navegador y puede abrirse sin conexión.
 
+## Tutorial de uso
+
+La primera vez que abras la aplicación aparecerá una guía rápida de cuatro pasos sobre cómo preparar el grupo, generar jornadas, registrar resultados y gestionar cambios de disponibilidad. Usa **Anterior** y **Siguiente** para recorrerla, o **Omitir tutorial** para cerrarla. La guía no vuelve a aparecer automáticamente en ese dispositivo después de cerrarla; puedes abrirla de nuevo en cualquier momento con el botón `?` de la barra superior.
+
 ### Instalar y usar en teléfono o tablet
 
 - **iPhone/iPad:** abre la aplicación en Safari, pulsa **Compartir** y elige **Añadir a pantalla de inicio**. Ábrela desde el nuevo icono para usarla en modo aplicación.
