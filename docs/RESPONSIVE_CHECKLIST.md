@@ -19,6 +19,7 @@
 - [ ] **Lesión/alta:** abrir selector de fecha y estado; abrir teclado; desplazar el diálogo y alcanzar cancelar/preparar.
 - [ ] **Vista previa:** revisar cargas y botones con el teclado cerrado/abierto, rotar el dispositivo y cancelar/confirmar.
 - [ ] **Tutorial:** probar la primera visita y su reapertura desde `?`; recorrer pasos, omitir/cerrar y comprobar que los controles siguen visibles con scroll en móvil.
+- [ ] **Tema:** alternar luna/sol en cada ancho; comprobar que el botón no comprime la cabecera, los diálogos siguen legibles y la preferencia se conserva al recargar.
 - [ ] **Táctil:** controles principales de al menos 44 × 44 CSS px, foco visible y operación sin hover.
 - [ ] **Overflow:** no hay scroll horizontal del documento; se permite solo dentro del selector de jornadas y las regiones que lo indiquen.
 - [ ] **PWA instalada:** comprobar insets superior/inferior en Safari iOS y Chrome Android, y que el contenido no quede debajo de barras del sistema.

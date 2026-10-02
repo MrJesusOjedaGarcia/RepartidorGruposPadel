@@ -38,6 +38,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 20. Permitir reabrir un partido completado o interrumpido. La acción requiere confirmación, devuelve el partido a pendiente, limpia el resultado/puntos anteriores si los había y conserva jornada, pista y equipos para volver a jugarlo o registrar el estado correcto.
 21. Resaltar visualmente los nombres de jugadores líderes en las tarjetas de cada jornada y usar «jugador líder» en las etiquetas y ayudas visibles de la aplicación.
 22. Permitir eliminar todos los jugadores con una sola acción confirmada. Si ya existe un torneo, borrar también sus jornadas y resultados para no conservar partidos sin participantes.
+23. Ofrecer un control accesible para alternar entre tema claro y oscuro. Sin elección guardada, seguir el tema del sistema; recordar la selección en el dispositivo, aplicar el tema antes de mostrar la interfaz y actualizar los diálogos, controles, clasificación exportada y color de la barra del navegador.
 
 ## Reglas de integridad del torneo
 
@@ -89,6 +90,7 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 13. El selector permite jornadas con partidos sin líderes o exigir líderes en todos los partidos. Con la opción estricta, solo se genera un partido cuando puede asignarse un líder a cada equipo.
 14. Los nombres de los jugadores líderes aparecen resaltados en las tarjetas de las jornadas y se indica su rol con texto accesible; la interfaz utiliza el término «jugador líder».
 15. El botón de eliminación masiva pide confirmación. Sin torneo, limpia la lista; con un torneo, limpia también jornadas, partidos y resultados, y vuelve a la configuración.
+16. El selector de tema alterna claro/oscuro, inicialmente sigue la preferencia del sistema y conserva la elección local tras recargar o instalar la PWA. Los textos y controles siguen siendo legibles y la exportación PNG usa el tema seleccionado.
 
 ## Versionado de la aplicación
 
@@ -104,3 +106,4 @@ El diseño de baja fidelidad y los wireframes de las vistas se mantienen en `dis
 - Partidos: posibilidad de reabrir un resultado o interrupción y volver a jugar/corregir el partido.
 - Reparto: política configurable de jugadores líderes, máxima ocupación viable de pistas y rotación preferente de descansos.
 - Grupo: opción de eliminar todos los jugadores de una vez, confirmando el borrado del torneo si lo hay.
+- Apariencia: tema oscuro y claro con preferencia del sistema y persistencia local.

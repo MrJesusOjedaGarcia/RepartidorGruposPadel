@@ -1,5 +1,13 @@
 # Registro de cambios
 
+## [1.3.8] - 2026-10-02
+
+### Añadido
+
+- Control para alternar tema claro/oscuro, con preferencia del sistema inicial y elección persistida localmente.
+- Paleta oscura para configuración, jornadas, clasificación y diálogos; la imagen PNG respeta el tema activo.
+- Actualización del color de navegador/status bar y arranque con el tema elegido para evitar parpadeo claro.
+
 ## [1.3.7] - 2026-09-30
 
 ### Mejorado

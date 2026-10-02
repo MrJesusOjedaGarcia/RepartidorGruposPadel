@@ -12,6 +12,7 @@ PWA de una sola página para organizar partidos de pádel, generar jornadas, reg
 - **Vite:** servidor de desarrollo y compilación estática.
 - **vite-plugin-pwa / Workbox:** manifiesto y service worker para instalación y acceso sin conexión después de la primera carga.
 - **Responsive móvil/tablet:** CSS por anchos/orientación, `viewport-fit=cover`, insets `safe-area-inset-*` y soporte de altura dinámica para Safari iOS/Chrome Android.
+- **Temas claro/oscuro:** `src/dark-mode.css` ofrece la paleta alternativa; `src/domain/theme.ts` resuelve preferencia local o del sistema, y `index.html` aplica la selección antes del primer pintado.
 - **Tutorial guiado:** cuatro pasos accesibles en `src/App.vue`, mostrado en primera visita, navegable con teclado/tacto y reabrible desde la cabecera; la preferencia se recuerda con una clave independiente en `localStorage`.
 - **Indicador de líder:** las tarjetas renderizan cada nombre por separado, resaltan a los jugadores líderes y añaden una etiqueta accesible para lectores de pantalla.
 - **Web Storage:** persistencia automática en `localStorage`, esquema `repartidor-padel-v2`, con migración desde `v1`.
@@ -23,10 +24,13 @@ src/
 ├── main.ts                 # Punto de entrada Vue
 ├── style.css               # Sistema visual base
 ├── responsive.css          # Variantes móvil/tablet, safe areas y teclado
+├── dark-mode.css           # Paleta oscura para todas las vistas y diálogos
 └── domain/
     ├── scheduler.ts        # Tipos, disponibilidad y algoritmos de reparto/recalculo
     ├── standings.ts        # Cálculo de puntos y clasificación
-    └── scheduler.test.ts   # Pruebas de planificación, estados y puntuación
+    ├── theme.ts            # Preferencia del tema y resolución de tema del sistema
+    ├── scheduler.test.ts   # Pruebas de planificación, estados y puntuación
+    └── theme.test.ts       # Pruebas de preferencia y modo del sistema
 public/
 ├── padel.svg               # Marca e icono del sitio
 ├── pwa-192.svg             # Icono instalable
@@ -50,7 +54,7 @@ El reparto compara calendarios por cantidad de partidos llenos, dispersión de a
 
 ## Versionado y publicaciones
 
-`package.json` es la fuente de la versión SemVer, que la interfaz muestra en la barra superior; `package-lock.json` mantiene el mismo número. Cada publicación se documenta en `CHANGELOG.md` y se marca en Git con una etiqueta `v<versión>` (por ejemplo, `v1.3.7`). Para el siguiente cambio de versión, actualizar el paquete con `npm version patch`, `npm version minor` o `npm version major`, completar el changelog y publicar tanto el commit como la etiqueta.
+`package.json` es la fuente de la versión SemVer, que la interfaz muestra en la barra superior; `package-lock.json` mantiene el mismo número. Cada publicación se documenta en `CHANGELOG.md` y se marca en Git con una etiqueta `v<versión>` (por ejemplo, `v1.3.8`). Para el siguiente cambio de versión, actualizar el paquete con `npm version patch`, `npm version minor` o `npm version major`, completar el changelog y publicar tanto el commit como la etiqueta.
 
 ## Puntuación y persistencia
 
@@ -59,6 +63,8 @@ El reparto compara calendarios por cantidad de partidos llenos, dispersión de a
 - La clasificación se ordena por puntos, después por victorias y finalmente por nombre.
 - Los cambios de jugadores, disponibilidad, ajustes, jornadas, estados y resultados se guardan automáticamente en el almacenamiento local del navegador. No se envían a un servidor.
 - El tutorial usa `repartidor-padel-tutorial-v1` para recordar que se cerró; esta preferencia es independiente del torneo.
+- La apariencia usa `repartidor-padel-theme-v1` (`light`/`dark`); si no existe una elección sigue `prefers-color-scheme`. La preferencia no se mezcla con el almacenamiento del torneo.
+- La exportación PNG adopta una paleta clara u oscura según el tema activo.
 
 ## Desarrollo y publicación
 
@@ -84,7 +90,7 @@ El contenido de `dist/` es estático y se puede publicar en cualquier hosting HT
 
 ## Adaptación a móvil y tablet
 
-- `src/responsive.css` se carga después de los estilos de escritorio y define las variantes móvil/tablet sin alterar las reglas de negocio.
+- `src/responsive.css` se carga después de los estilos de escritorio y define las variantes móvil/tablet sin alterar las reglas de negocio; `src/dark-mode.css` va después para aplicar la paleta accesible en todas las resoluciones.
 - El layout admite anchos de 320 CSS px en adelante. Por debajo de 680 px la configuración se apila; desde 720 px los partidos vuelven a una cuadrícula de dos columnas. Los cortes exactos se mantienen en CSS y se validan con la matriz `docs/RESPONSIVE_CHECKLIST.md`.
 - En móvil, la clasificación usa tarjetas etiquetadas (PJ/G/E/P/PTS); los selectores de jornadas conservan scroll táctil local. Los campos tienen tamaño de texto adecuado para que Safari iOS no aplique zoom automático.
 - Las hojas de disponibilidad/recálculo se ajustan a `100dvh` y respetan insets seguros en retrato, paisaje y cuando aparece el teclado virtual.

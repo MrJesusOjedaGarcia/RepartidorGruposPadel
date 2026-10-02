@@ -1,0 +1,371 @@
+/* Palette and component surfaces for the persisted/system dark theme. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  color: #e6ece6;
+  background: #111713;
+  --green: #173d35;
+  --green-light: #244f45;
+  --coral: #ed9270;
+  --cream: #111713;
+  --ink: #e6ece6;
+  --muted: #a3ada5;
+  --line: #35423b;
+  --dark-surface: #1b2420;
+  --dark-surface-raised: #242d27;
+  --dark-border: #3a4840;
+  --dark-text: #e6ece6;
+  --dark-muted: #a6b0a7;
+  --dark-accent: #a6cdb9;
+}
+
+:root[data-theme='dark'] body {
+  background: #111713;
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] .app-shell {
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] .brand,
+:root[data-theme='dark'] .view-tabs button.selected,
+:root[data-theme='dark'] .player-count,
+:root[data-theme='dark'] .team-label b,
+:root[data-theme='dark'] .points-cell {
+  color: var(--dark-accent);
+}
+
+:root[data-theme='dark'] .brand-word small,
+:root[data-theme='dark'] .offline-tag,
+:root[data-theme='dark'] .version-tag,
+:root[data-theme='dark'] .view-tabs button:not(.selected),
+:root[data-theme='dark'] .tab-num,
+:root[data-theme='dark'] .hero-copy > p,
+:root[data-theme='dark'] .section-heading p,
+:root[data-theme='dark'] .panel-heading p,
+:root[data-theme='dark'] .player-index,
+:root[data-theme='dark'] .player-name,
+:root[data-theme='dark'] .player-count small,
+:root[data-theme='dark'] .panel-footnote,
+:root[data-theme='dark'] .empty-players small,
+:root[data-theme='dark'] .mode-field legend,
+:root[data-theme='dark'] .number-settings label > span:first-child,
+:root[data-theme='dark'] .points-note,
+:root[data-theme='dark'] .matches-meta,
+:root[data-theme='dark'] .matches-meta span:last-child,
+:root[data-theme='dark'] .match-card-top,
+:root[data-theme='dark'] .team-label span,
+:root[data-theme='dark'] .page-footer,
+:root[data-theme='dark'] .standings-toolbar,
+:root[data-theme='dark'] .standings-table th,
+:root[data-theme='dark'] .standing-player span,
+:root[data-theme='dark'] .rank:not(.gold),
+:root[data-theme='dark'] .scoring-legend,
+:root[data-theme='dark'] .tutorial-progress-head,
+:root[data-theme='dark'] .tutorial-skip,
+:root[data-theme='dark'] .tutorial-copy > p,
+:root[data-theme='dark'] .court-note,
+:root[data-theme='dark'] .captain-policy-field small,
+:root[data-theme='dark'] .modal-field,
+:root[data-theme='dark'] .preview-note,
+:root[data-theme='dark'] .preview-counts span,
+:root[data-theme='dark'] .preview-load h3,
+:root[data-theme='dark'] .preview-load-row span,
+:root[data-theme='dark'] .preview-footnote {
+  color: var(--dark-muted);
+}
+
+:root[data-theme='dark'] .panel,
+:root[data-theme='dark'] .match-card,
+:root[data-theme='dark'] .standings-table-wrap,
+:root[data-theme='dark'] .standings-table tbody tr,
+:root[data-theme='dark'] .no-matches,
+:root[data-theme='dark'] .empty-players,
+:root[data-theme='dark'] .add-player,
+:root[data-theme='dark'] .number-input,
+:root[data-theme='dark'] .segmented-control,
+:root[data-theme='dark'] .round-selector button,
+:root[data-theme='dark'] .preview-blocker,
+:root[data-theme='dark'] .preview-counts > div,
+:root[data-theme='dark'] .preview-load,
+:root[data-theme='dark'] .modal-card {
+  border-color: var(--dark-border);
+  background-color: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] .standings-table-wrap {
+  background-color: var(--dark-surface);
+}
+
+:root[data-theme='dark'] .notice {
+  border-color: #496454;
+  background-color: #24352b;
+  color: #d4e4d4;
+}
+
+:root[data-theme='dark'] .winner-seal {
+  border-color: #546d5c;
+  background-color: #202c24;
+  color: #b9d6bf;
+}
+
+:root[data-theme='dark'] .progress-stamp {
+  background-color: #203d32;
+  color: #e4eee5;
+}
+
+:root[data-theme='dark'] .standings-table tbody tr.podium {
+  background-color: #29372f;
+}
+
+:root[data-theme='dark'] .standings-table th,
+:root[data-theme='dark'] .standings-table td,
+:root[data-theme='dark'] .player-row,
+:root[data-theme='dark'] .matches-meta,
+:root[data-theme='dark'] .tutorial-actions {
+  border-color: var(--dark-border);
+}
+
+:root[data-theme='dark'] .preview-load-row {
+  border-color: var(--dark-border);
+}
+
+:root[data-theme='dark'] .panel-heading h3,
+:root[data-theme='dark'] .hero h1,
+:root[data-theme='dark'] .section-heading h2,
+:root[data-theme='dark'] .team strong,
+:root[data-theme='dark'] .standing-player strong,
+:root[data-theme='dark'] .modal-card h2,
+:root[data-theme='dark'] .tutorial-card h2,
+:root[data-theme='dark'] .no-matches h3 {
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] select,
+:root[data-theme='dark'] .add-player input,
+:root[data-theme='dark'] .captain-policy-field select,
+:root[data-theme='dark'] .join-round-field select,
+:root[data-theme='dark'] .modal-field select {
+  border-color: var(--dark-border);
+  background-color: #141b17;
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] input::placeholder {
+  color: #8c988f;
+  opacity: 1;
+}
+
+:root[data-theme='dark'] .mode-field {
+  border-color: var(--dark-border);
+}
+
+:root[data-theme='dark'] .segmented-control button,
+:root[data-theme='dark'] .number-input button {
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] .segmented-control button.chosen {
+  background-color: #304c3b;
+  color: #eff4ed;
+}
+
+:root[data-theme='dark'] .number-input button {
+  border-color: var(--dark-border);
+}
+
+:root[data-theme='dark'] .round-selector button.active {
+  border-color: #557967;
+  background-color: #285044;
+  color: #f0f3ed;
+}
+
+:root[data-theme='dark'] .round-selector button.complete:not(.active) {
+  background-color: #23322b;
+}
+
+:root[data-theme='dark'] .view-tabs button.selected::after,
+:root[data-theme='dark'] .tutorial-progress-track span {
+  background-color: var(--coral);
+}
+
+:root[data-theme='dark'] .tab-count,
+:root[data-theme='dark'] .tutorial-illustration small {
+  background-color: var(--coral);
+  color: #171b17;
+}
+
+:root[data-theme='dark'] .captain-toggle {
+  border-color: #52664f;
+  background-color: #222b23;
+  color: #becbb6;
+}
+
+:root[data-theme='dark'] .captain-toggle.captain {
+  border-color: #876c42;
+  background-color: #3a3021;
+  color: #f0ce84;
+}
+
+:root[data-theme='dark'] .availability-pill {
+  background-color: #2b3928;
+  color: #c0d49d;
+}
+
+:root[data-theme='dark'] .availability-pill.unavailable,
+:root[data-theme='dark'] .standing-player .standing-unavailable {
+  background-color: #482d27;
+  color: #f0a18a;
+}
+
+:root[data-theme='dark'] .availability-action,
+:root[data-theme='dark'] .clear-players-button {
+  border-color: #634638;
+  background-color: #332721;
+  color: #efa185;
+}
+
+:root[data-theme='dark'] .clear-players-button:hover {
+  background-color: #493128;
+}
+
+:root[data-theme='dark'] .result-actions button {
+  border-color: var(--dark-border);
+  background-color: #242d27;
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] .result-actions button.picked {
+  border-color: #52725d;
+  background-color: #304c3b;
+  color: #eef3eb;
+}
+
+:root[data-theme='dark'] .match-status.recorded {
+  color: #a8cdb2;
+}
+
+:root[data-theme='dark'] .match-status.interrupted,
+:root[data-theme='dark'] .match-controls .interrupt-button {
+  color: #f0a18a;
+}
+
+:root[data-theme='dark'] .match-status.playing {
+  color: #ebc77e;
+}
+
+:root[data-theme='dark'] .match-card.interrupted {
+  border-color: #765044;
+  background-color: #2b211e;
+}
+
+:root[data-theme='dark'] .match-card.inprogress {
+  border-color: #75623e;
+  background-color: #29251b;
+}
+
+:root[data-theme='dark'] .modal-backdrop {
+  background-color: rgb(3 8 5 / 78%);
+}
+
+:root[data-theme='dark'] .modal-close {
+  border-color: var(--dark-border);
+  background-color: #242d27;
+  color: var(--dark-text);
+}
+
+:root[data-theme='dark'] .modal-card > p,
+:root[data-theme='dark'] .tutorial-copy > p {
+  color: #b2bbb3;
+}
+
+:root[data-theme='dark'] .tutorial-progress-track {
+  background-color: #35413a;
+}
+
+:root[data-theme='dark'] .tutorial-illustration {
+  border-color: #49584c;
+  background: radial-gradient(circle at 35% 30%, #34463a, #202a23);
+  color: #c3ddc9;
+}
+
+:root[data-theme='dark'] .tutorial-illustration small {
+  border-color: #1b2420;
+}
+
+:root[data-theme='dark'] .tutorial-tip {
+  border-left-color: var(--coral);
+  background-color: #292d26;
+  color: #d5ddd3;
+}
+
+:root[data-theme='dark'] .tutorial-dots button::before {
+  background-color: #566359;
+}
+
+:root[data-theme='dark'] .tutorial-dots button.active::before {
+  background-color: #a8cfb6;
+}
+
+:root[data-theme='dark'] .tutorial-actions {
+  border-top-color: var(--dark-border);
+}
+
+:root[data-theme='dark'] .modal-actions,
+:root[data-theme='dark'] .tutorial-card .tutorial-actions {
+  background-color: var(--dark-surface);
+}
+
+:root[data-theme='dark'] .scoring-legend i,
+:root[data-theme='dark'] .team-player-separator {
+  color: #a0aca0;
+}
+
+:root[data-theme='dark'] .team-player-name.leader-player {
+  color: #f0a181;
+  text-decoration-color: #98634e;
+}
+
+:root[data-theme='dark'] .leader-player-mark,
+:root[data-theme='dark'] .section-heading .section-kicker,
+:root[data-theme='dark'] .eyebrow,
+:root[data-theme='dark'] .section-kicker {
+  color: #f09977;
+}
+
+:root[data-theme='dark'] .theme-toggle {
+  border-color: #526259;
+  background-color: #222c26;
+  color: #e9c77f;
+}
+
+:root[data-theme='dark'] .theme-toggle:hover {
+  background-color: #304137;
+}
+
+:root[data-theme='dark'] ::selection {
+  background-color: #476552;
+  color: #f4f5ef;
+}
+
+@media (max-width: 560px) {
+  .topbar-right {
+    gap: 4px;
+  }
+
+  .offline-tag {
+    display: none;
+  }
+
+  .brand {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 359px) {
+  .version-tag {
+    display: none;
+  }
+}

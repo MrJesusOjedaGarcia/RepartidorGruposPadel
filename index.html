@@ -10,6 +10,16 @@
     <meta name="apple-mobile-web-app-title" content="Repartidor" />
     <link rel="apple-touch-icon" href="%BASE_URL%pwa-192.svg" />
     <meta name="description" content="Organiza tus jornadas de pádel, reparte las pistas y sigue los resultados de tu grupo." />
+    <script>
+      (() => {
+        let preference = null;
+        try { preference = localStorage.getItem('repartidor-padel-theme-v1'); } catch {}
+        const dark = preference === 'dark' || (preference !== 'light' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#111713' : '#f5f3ed');
+        document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', dark ? 'black-translucent' : 'default');
+      })();
+    </script>
     <title>Repartidor — Pádel en buena compañía</title>
   </head>
   <body>

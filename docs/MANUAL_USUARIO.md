@@ -8,6 +8,10 @@ Abre la aplicación en el navegador. Añádela a la pantalla de inicio desde el 
 
 La primera vez que abras la aplicación aparecerá una guía rápida de cuatro pasos sobre cómo preparar el grupo, generar jornadas, registrar resultados y gestionar cambios de disponibilidad. Usa **Anterior** y **Siguiente** para recorrerla, o **Omitir tutorial** para cerrarla. La guía no vuelve a aparecer automáticamente en ese dispositivo después de cerrarla; puedes abrirla de nuevo en cualquier momento con el botón `?` de la barra superior.
 
+## Tema claro y oscuro
+
+Pulsa el botón de luna/sol de la barra superior para alternar entre tema oscuro y claro. Al principio, la aplicación sigue automáticamente la apariencia configurada en el teléfono, tablet o equipo. Al elegir un tema, guarda esa preferencia en el dispositivo y la mantiene al volver a abrir la PWA. La clasificación PNG también se exporta con el tema activo.
+
 ### Instalar y usar en teléfono o tablet
 
 - **iPhone/iPad:** abre la aplicación en Safari, pulsa **Compartir** y elige **Añadir a pantalla de inicio**. Ábrela desde el nuevo icono para usarla en modo aplicación.

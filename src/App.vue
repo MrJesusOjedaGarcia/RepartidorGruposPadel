@@ -15,6 +15,7 @@ import {
   type ScheduleResult
 } from './domain/scheduler'
 import { calculateStandings } from './domain/standings'
+import { readThemePreference, resolveTheme, THEME_STORAGE_KEY, toggleTheme as getNextTheme } from './domain/theme'
 import packageMetadata from '../package.json'
 
 interface StoredApp {
@@ -44,6 +45,12 @@ const TUTORIAL_STORAGE_KEY = 'repartidor-padel-tutorial-v1'
 const appVersion = packageMetadata.version
 const publicBase = import.meta.env.BASE_URL
 const LEGACY_STORAGE_KEY = 'repartidor-padel-v1'
+const themePreference = ref(readStoredThemePreference())
+const colorSchemeQuery = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+  ? window.matchMedia('(prefers-color-scheme: dark)')
+  : null
+const systemPrefersDark = ref(colorSchemeQuery?.matches ?? false)
+const darkMode = computed(() => resolveTheme(themePreference.value, systemPrefersDark.value) === 'dark')
 const players = ref<Player[]>([])
 const rounds = ref<Round[]>([])
 const roundCount = ref(5)
@@ -94,6 +101,34 @@ const tutorialSteps = [
   }
 ]
 let removeViewportListeners = () => {}
+let removeColorSchemeListener = () => {}
+
+function readStoredThemePreference() {
+  try {
+    return readThemePreference(localStorage.getItem(THEME_STORAGE_KEY))
+  } catch {
+    return 'system' as const
+  }
+}
+
+function applyTheme(isDark: boolean) {
+  if (typeof document === 'undefined') return
+  const resolved = isDark ? 'dark' : 'light'
+  document.documentElement.dataset.theme = resolved
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#111713' : '#f5f3ed')
+  document.querySelector<HTMLMetaElement>('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', isDark ? 'black-translucent' : 'default')
+}
+
+watch(darkMode, applyTheme, { immediate: true })
+
+function toggleColorTheme() {
+  themePreference.value = getNextTheme(darkMode.value)
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themePreference.value)
+  } catch {
+    // Keep the selected theme for this session if local storage is unavailable.
+  }
+}
 
 function syncVisualViewportHeight() {
   const height = window.visualViewport?.height ?? window.innerHeight
@@ -172,6 +207,17 @@ onMounted(() => {
     window.removeEventListener('resize', syncVisualViewportHeight)
     window.removeEventListener('orientationchange', syncVisualViewportHeight)
   }
+  if (colorSchemeQuery) {
+    const syncSystemTheme = (event: MediaQueryListEvent) => { systemPrefersDark.value = event.matches }
+    systemPrefersDark.value = colorSchemeQuery.matches
+    if (typeof colorSchemeQuery.addEventListener === 'function') {
+      colorSchemeQuery.addEventListener('change', syncSystemTheme)
+      removeColorSchemeListener = () => colorSchemeQuery.removeEventListener('change', syncSystemTheme)
+    } else {
+      colorSchemeQuery.addListener(syncSystemTheme)
+      removeColorSchemeListener = () => colorSchemeQuery.removeListener(syncSystemTheme)
+    }
+  }
   try {
     const current = localStorage.getItem(STORAGE_KEY)
     const saved = current ?? localStorage.getItem(LEGACY_STORAGE_KEY)
@@ -215,7 +261,10 @@ onMounted(() => {
   }
 })
 
-onBeforeUnmount(() => removeViewportListeners())
+onBeforeUnmount(() => {
+  removeViewportListeners()
+  removeColorSchemeListener()
+})
 
 watch([players, rounds, roundCount, courtCount, mode, captainPolicy], () => {
   if (!storageReady.value) return
@@ -507,23 +556,23 @@ function exportStandings() {
   const context = canvas.getContext('2d')
   if (!context) return
 
-  context.fillStyle = '#f5f3ed'
+  context.fillStyle = darkMode.value ? '#111713' : '#f5f3ed'
   context.fillRect(0, 0, canvas.width, canvas.height)
-  context.fillStyle = '#153b34'
+  context.fillStyle = darkMode.value ? '#1d4339' : '#153b34'
   context.beginPath()
   context.roundRect(38, 34, width - 76, 210, 28)
   context.fill()
-  context.fillStyle = '#f7f5ee'
+  context.fillStyle = darkMode.value ? '#edf1eb' : '#f7f5ee'
   context.font = '700 24px Arial, sans-serif'
   context.fillText('REPARTIDOR  ·  PÁDEL EN BUENA COMPAÑÍA', 76, 88)
   context.font = '700 48px Arial, sans-serif'
   context.fillText('Clasificación del grupo', 76, 153)
-  context.fillStyle = '#c5d0a6'
+  context.fillStyle = darkMode.value ? '#bdd2c1' : '#c5d0a6'
   context.font = '20px Arial, sans-serif'
   context.fillText(`${rounds.value.length} jornadas  ·  ${finishedMatches.value} partidos jugados`, 76, 199)
 
   const top = 282
-  context.fillStyle = '#778078'
+  context.fillStyle = darkMode.value ? '#a6b0a7' : '#778078'
   context.font = '700 17px Arial, sans-serif'
   context.fillText('#', 78, top)
   context.fillText('JUGADOR', 148, top)
@@ -535,23 +584,25 @@ function exportStandings() {
 
   standings.value.forEach((row, index) => {
     const y = top + 25 + index * rowHeight
-    context.fillStyle = index % 2 === 0 ? '#fffefa' : '#ecebe3'
+    context.fillStyle = darkMode.value
+      ? index % 2 === 0 ? '#1b2420' : '#242d27'
+      : index % 2 === 0 ? '#fffefa' : '#ecebe3'
     context.beginPath()
     context.roundRect(58, y, width - 116, rowHeight - 8, 15)
     context.fill()
-    context.fillStyle = index === 0 ? '#dd7959' : '#153b34'
+    context.fillStyle = index === 0 ? '#ed9270' : darkMode.value ? '#a7cdb9' : '#153b34'
     context.font = '700 22px Arial, sans-serif'
     context.fillText(String(index + 1).padStart(2, '0'), 78, y + 37)
-    context.fillStyle = '#172b27'
+    context.fillStyle = darkMode.value ? '#e8eee8' : '#172b27'
     context.font = '700 23px Arial, sans-serif'
     context.fillText(row.player.name.slice(0, 35), 148, y + 37)
     context.font = '20px Arial, sans-serif'
-    context.fillStyle = '#65716b'
+    context.fillStyle = darkMode.value ? '#a6b0a7' : '#65716b'
     context.fillText(String(row.played), 765, y + 37)
     context.fillText(String(row.wins), 870, y + 37)
     context.fillText(String(row.draws), 950, y + 37)
     context.fillText(String(row.losses), 1030, y + 37)
-    context.fillStyle = '#153b34'
+    context.fillStyle = darkMode.value ? '#b9d5c5' : '#153b34'
     context.font = '700 25px Arial, sans-serif'
     context.fillText(String(row.points), 1090, y + 37)
   })
@@ -586,6 +637,7 @@ function resetTournament() {
       <div class="topbar-right">
         <span class="offline-tag"><span></span> GUARDADO EN ESTE DISPOSITIVO</span>
         <span class="version-tag" :aria-label="`Versión ${appVersion}`">v{{ appVersion }}</span>
+        <button class="icon-button theme-toggle" type="button" :aria-label="darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'" :aria-pressed="darkMode" :title="darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'" @click="toggleColorTheme"><span aria-hidden="true">{{ darkMode ? '☼' : '☾' }}</span></button>
         <button ref="tutorialTrigger" class="icon-button tutorial-trigger" type="button" aria-label="Abrir tutorial de uso" title="Tutorial y ayuda" @click="openTutorial">?</button>
         <button v-if="rounds.length" class="icon-button" type="button" aria-label="Reiniciar torneo" title="Borrar jornadas y resultados" @click="resetTournament">↻</button>
       </div>
